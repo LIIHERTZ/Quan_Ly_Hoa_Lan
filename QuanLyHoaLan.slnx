@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="Core/QuanLyHoaLan.Application/QuanLyHoaLan.Application.csproj" />
+    <Project Path="Core/QuanLyHoaLan.Domain/QuanLyHoaLan.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/QuanLyHoaLan.Infrastructure/QuanLyHoaLan.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="Presentation/QuanLyHoaLan.API/QuanLyHoaLan.API.csproj" />
+  </Folder>
+</Solution>
