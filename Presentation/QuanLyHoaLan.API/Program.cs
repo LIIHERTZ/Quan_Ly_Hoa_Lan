@@ -113,6 +113,8 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => "QuanLyHoaLan API is running perfectly!");
+
 app.MapControllers();
 
 app.Run();
