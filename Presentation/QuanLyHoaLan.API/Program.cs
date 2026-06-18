@@ -93,17 +93,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseReDoc(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseReDoc(options =>
-    {
-        options.DocumentTitle = "QuanLyHoaLan API Documentation";
-        options.SpecUrl = "/swagger/v1/swagger.json";
-        options.RoutePrefix = "redocs";
-    });
-}
+    options.DocumentTitle = "QuanLyHoaLan API Documentation";
+    options.SpecUrl = "/swagger/v1/swagger.json";
+    options.RoutePrefix = "redocs";
+});
 
 app.UseHttpsRedirection();
 
@@ -112,8 +109,6 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapGet("/", () => "QuanLyHoaLan API is running perfectly!");
 
 app.MapControllers();
 
