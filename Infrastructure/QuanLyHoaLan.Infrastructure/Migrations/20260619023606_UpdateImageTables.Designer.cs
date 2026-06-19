@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuanLyHoaLan.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using QuanLyHoaLan.Infrastructure.Persistence;
 namespace QuanLyHoaLan.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260619023606_UpdateImageTables")]
+    partial class UpdateImageTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,21 +25,6 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryOrchid", b =>
-                {
-                    b.Property<Guid>("CategoriesId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("OrchidsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CategoriesId", "OrchidsId");
-
-                    b.HasIndex("OrchidsId");
-
-                    b.ToTable("CategoryOrchid");
-                });
 
             modelBuilder.Entity("QuanLyHoaLan.Domain.Entities.Category", b =>
                 {
@@ -170,6 +158,9 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ConcurrencyStamp")
                         .HasColumnType("uuid");
 
@@ -235,6 +226,8 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                         .HasColumnType("uuid[]");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -416,21 +409,6 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CategoryOrchid", b =>
-                {
-                    b.HasOne("QuanLyHoaLan.Domain.Entities.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("QuanLyHoaLan.Domain.Entities.Orchid", null)
-                        .WithMany()
-                        .HasForeignKey("OrchidsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("QuanLyHoaLan.Domain.Entities.Category", b =>
                 {
                     b.HasOne("QuanLyHoaLan.Domain.Entities.Category", "ParentCategory")
@@ -452,6 +430,17 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("QuanLyHoaLan.Domain.Entities.Orchid", b =>
+                {
+                    b.HasOne("QuanLyHoaLan.Domain.Entities.Category", "Category")
+                        .WithMany("Orchids")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("QuanLyHoaLan.Domain.Entities.User", b =>
                 {
                     b.HasOne("QuanLyHoaLan.Domain.Entities.Role", "Role")
@@ -465,6 +454,8 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
 
             modelBuilder.Entity("QuanLyHoaLan.Domain.Entities.Category", b =>
                 {
+                    b.Navigation("Orchids");
+
                     b.Navigation("SubCategories");
                 });
 
