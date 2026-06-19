@@ -8,6 +8,7 @@ using QuanLyHoaLan.Application.Features.Images.Commands.DeleteImage;
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiVersion("1.0")]
+[Authorize(Roles = "Admin")]
 public class ImagesController : BaseController
 {
     [HttpPost("upload")]

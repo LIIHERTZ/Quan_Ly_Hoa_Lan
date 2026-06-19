@@ -8,10 +8,13 @@ using QuanLyHoaLan.Application.Features.Orchids.Commands.DeleteOrchid;
 using QuanLyHoaLan.Application.Features.Orchids.Queries.GetOrchids;
 using QuanLyHoaLan.Application.Features.Orchids.Queries.GetOrchidById;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "Admin")]
 public class OrchidsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -22,6 +25,7 @@ public class OrchidsController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetOrchids([FromQuery] GetOrchidsQuery query)
     {
         var result = await _mediator.Send(query);
@@ -29,6 +33,7 @@ public class OrchidsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetOrchidById(Guid id)
     {
         var result = await _mediator.Send(new GetOrchidByIdQuery(id));

@@ -8,10 +8,13 @@ using QuanLyHoaLan.Application.Features.Categories.Commands.DeleteCategory;
 using QuanLyHoaLan.Application.Features.Categories.Queries.GetCategories;
 using QuanLyHoaLan.Application.Features.Categories.Queries.GetCategoryById;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(Roles = "Admin")]
 public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -22,6 +25,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetCategories([FromQuery] GetCategoriesQuery query)
     {
         var result = await _mediator.Send(query);
@@ -29,6 +33,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetCategoryById(Guid id)
     {
         var result = await _mediator.Send(new GetCategoryByIdQuery(id));
