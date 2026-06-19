@@ -7,6 +7,7 @@ using QuanLyHoaLan.Application.Features.Documents.Commands.DeleteDocument;
 using QuanLyHoaLan.Application.Features.Documents.Commands.UploadDocument;
 using QuanLyHoaLan.Application.Features.Documents.Queries.GetDocuments;
 using QuanLyHoaLan.Application.Common.Models;
+using QuanLyHoaLan.API.Models.Requests;
 
 namespace QuanLyHoaLan.API.Controllers;
 
@@ -30,18 +31,18 @@ public class DocumentsController : ControllerBase
     [HttpPost("upload")]
     [Authorize]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<AppDocumentDto>> UploadDocument([FromForm] IFormFile file, [FromForm] string title, [FromForm] string? description)
+    public async Task<ActionResult<AppDocumentDto>> UploadDocument([FromForm] UploadDocumentRequest request)
     {
-        if (file == null || file.Length == 0)
+        if (request.File == null || request.File.Length == 0)
             return BadRequest("File is empty.");
 
-        using var stream = file.OpenReadStream();
+        using var stream = request.File.OpenReadStream();
         var command = new UploadDocumentCommand 
         { 
-            Title = title,
-            Description = description,
+            Title = request.Title,
+            Description = request.Description,
             FileStream = stream,
-            FileName = file.FileName
+            FileName = request.File.FileName
         };
         var result = await _mediator.Send(command);
         return Ok(result);
