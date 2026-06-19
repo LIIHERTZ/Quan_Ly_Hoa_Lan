@@ -32,7 +32,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<JwtRefreshToken> JwtRefreshTokens { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Orchid> Orchids { get; set; } = null!;
+    public DbSet<Article> Articles { get; set; } = null!;
+    public DbSet<DiscussionPost> DiscussionPosts => Set<DiscussionPost>();
+    public DbSet<DiscussionComment> DiscussionComments => Set<DiscussionComment>();
     public DbSet<UploadedImage> UploadedImages { get; set; } = null!;
+    public DbSet<AppDocument> AppDocuments => Set<AppDocument>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

@@ -9,6 +9,8 @@ public class Orchid : BaseEntity
     // Many-to-Many Categories
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
     
+
+    
     public string ShortDescription { get; set; } = string.Empty;
     
     // Có thể lưu định dạng HTML hoặc nội dung dài

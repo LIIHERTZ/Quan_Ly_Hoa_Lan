@@ -3,12 +3,13 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
 using QuanLyHoaLan.Application.Interfaces.Services;
+using QuanLyHoaLan.Application.Models;
 using AppImageUploadResult = QuanLyHoaLan.Application.Models.ImageUploadResult;
 using QuanLyHoaLan.Infrastructure.Settings;
 
 namespace QuanLyHoaLan.Infrastructure.Services;
 
-public class CloudinaryService : IImageService
+public class CloudinaryService : IImageService, IDocumentService
 {
     private readonly Cloudinary _cloudinary;
 
@@ -53,6 +54,42 @@ public class CloudinaryService : IImageService
     public async Task<bool> DeleteImageAsync(string publicId)
     {
         var deleteParams = new DeletionParams(publicId);
+        var result = await _cloudinary.DestroyAsync(deleteParams);
+
+        return result.Result == "ok";
+    }
+
+    public async Task<DocumentUploadResult?> UploadDocumentAsync(Stream fileStream, string fileName)
+    {
+        if (fileStream.Length == 0) return null;
+
+        var uploadParams = new RawUploadParams
+        {
+            File = new FileDescription(fileName, fileStream)
+        };
+
+        var result = await _cloudinary.UploadAsync(uploadParams);
+
+        if (result.Error != null)
+        {
+            return null;
+        }
+
+        return new DocumentUploadResult
+        {
+            Url = result.SecureUrl.ToString(),
+            PublicId = result.PublicId,
+            Bytes = result.Bytes,
+            Format = result.Format ?? Path.GetExtension(fileName).TrimStart('.')
+        };
+    }
+
+    public async Task<bool> DeleteDocumentAsync(string publicId)
+    {
+        var deleteParams = new DeletionParams(publicId)
+        {
+            ResourceType = ResourceType.Raw
+        };
         var result = await _cloudinary.DestroyAsync(deleteParams);
 
         return result.Result == "ok";

@@ -47,6 +47,7 @@ builder.Services.AddScoped<QuanLyHoaLan.Domain.Interfaces.Services.IDateTimeServ
 // 2.2 Cloudinary Settings & Service
 builder.Services.Configure<QuanLyHoaLan.Infrastructure.Settings.CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<QuanLyHoaLan.Application.Interfaces.Services.IImageService, QuanLyHoaLan.Infrastructure.Services.CloudinaryService>();
+builder.Services.AddScoped<QuanLyHoaLan.Application.Interfaces.Services.IDocumentService, QuanLyHoaLan.Infrastructure.Services.CloudinaryService>();
 
 // 2.5 Register Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
