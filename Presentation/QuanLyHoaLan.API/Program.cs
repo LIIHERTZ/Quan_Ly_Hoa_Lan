@@ -44,6 +44,10 @@ builder.Services.AddScoped(typeof(QuanLyHoaLan.Domain.Interfaces.Repositories.IB
 builder.Services.AddScoped<QuanLyHoaLan.Domain.Interfaces.Repositories.IUnitOfWork, QuanLyHoaLan.Infrastructure.Persistence.Repositories.UnitOfWork>();
 builder.Services.AddScoped<QuanLyHoaLan.Domain.Interfaces.Services.IDateTimeService, QuanLyHoaLan.Infrastructure.Services.DateTimeService>();
 
+// 2.2 Cloudinary Settings & Service
+builder.Services.Configure<QuanLyHoaLan.Infrastructure.Settings.CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddScoped<QuanLyHoaLan.Application.Interfaces.Services.IImageService, QuanLyHoaLan.Infrastructure.Services.CloudinaryService>();
+
 // 2.5 Register Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
