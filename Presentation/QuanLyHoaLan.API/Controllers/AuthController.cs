@@ -32,4 +32,12 @@ public class AuthController : BaseController
         var result = await Mediator.Send(command);
         return OkResult(result);
     }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] QuanLyHoaLan.Application.Features.Auth.Commands.Logout.LogoutCommand command)
+    {
+        await Mediator.Send(command);
+        return OkResult("Đăng xuất thành công");
+    }
 }
