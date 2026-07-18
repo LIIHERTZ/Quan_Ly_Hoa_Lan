@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.Application.Features.Auth.Commands.LoginWithGoogle;
 using QuanLyHoaLan.Application.Features.Auth.Commands.Login;
+using QuanLyHoaLan.Application.Features.Auth.Commands.Register;
 using Asp.Versioning;
 
 namespace QuanLyHoaLan.API.Controllers;
@@ -18,6 +19,15 @@ public class AuthController : BaseController
     }
 
     [AllowAnonymous]
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+    {
+        var result = await Mediator.Send(command);
+        return OkResult(result);
+    }
+
+    [AllowAnonymous]
+
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] LoginWithGoogleCommand command)
     {
