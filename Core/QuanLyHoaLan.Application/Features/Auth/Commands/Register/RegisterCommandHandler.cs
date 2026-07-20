@@ -29,20 +29,19 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
 
     public async Task<AuthResultDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        // 1. Check if email already exists
-        var existingUser = await _userRepository.FindOneAsync(
-            filters: new Expression<Func<User, bool>>[] { u => u.Email == request.Email }
-        );
+        var email = request.Email.Trim().ToLowerInvariant();
 
-        if (existingUser != null)
+        // 1. Check if email already exists
+        Expression<Func<User, bool>>[] emailFilters = [user => user.Email.ToLower() == email];
+        if (await _userRepository.AnyAsync(emailFilters, includeDeleted: true))
         {
-            throw new ValidationException(new Dictionary<string, string[]> { { "Email", new[] { "Email đã được sử dụng." } } });
+            throw new ValidationException(new Dictionary<string, string[]> { { "Email", new[] { "Email đã được sử dụng, kể cả bởi tài khoản đã xóa." } } });
         }
 
         // 2. Fetch default Role (User)
         var roleRepository = _unitOfWork.Repository<Role>();
         var defaultRole = await roleRepository.FindOneAsync(
-            filters: new Expression<Func<Role, bool>>[] { r => r.Name == RoleConstants.User }
+            filters: new Expression<Func<Role, bool>>[] { role => role.Code == RoleConstants.UserCode && role.IsActive }
         );
 
         if (defaultRole == null)
@@ -53,8 +52,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
         // 3. Create new user and hash password
         var user = new User
         {
-            Email = request.Email,
-            FullName = request.FullName,
+            Email = email,
+            FullName = request.FullName.Trim(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             RoleId = defaultRole.Id
         };

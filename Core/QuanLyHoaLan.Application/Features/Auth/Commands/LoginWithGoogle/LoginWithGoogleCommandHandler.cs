@@ -37,17 +37,27 @@ public class LoginWithGoogleCommandHandler : IRequestHandler<LoginWithGoogleComm
         // 2. Check if user exists
         var userRepository = _unitOfWork.Repository<User>();
         var roleRepository = _unitOfWork.Repository<Role>();
+        var email = googleUser.Email.Trim().ToLowerInvariant();
 
         var user = await userRepository.FindOneAsync(
-            filters: new Expression<Func<User, bool>>[] { u => u.Email == googleUser.Email },
-            includes: new Expression<Func<User, object>>[] { u => u.Role }
+            filters: new Expression<Func<User, bool>>[] { entity => entity.Email.ToLower() == email },
+            includes: new Expression<Func<User, object>>[] { entity => entity.Role! }
         );
 
         // 3. If not exists, create a new user
         if (user == null)
         {
+            Expression<Func<User, bool>>[] deletedUserFilters = [entity => entity.Email.ToLower() == email];
+            if (await userRepository.AnyAsync(deletedUserFilters, includeDeleted: true))
+            {
+                throw new ValidationException(new Dictionary<string, string[]>
+                {
+                    ["Email"] = ["Tài khoản sử dụng email này đã bị xóa. Vui lòng liên hệ quản trị viên."]
+                });
+            }
+
             var defaultRole = await roleRepository.FindOneAsync(
-                filters: new Expression<Func<Role, bool>>[] { r => r.Name == RoleConstants.User }
+                filters: new Expression<Func<Role, bool>>[] { role => role.Code == RoleConstants.UserCode && role.IsActive }
             );
 
             if (defaultRole == null)
@@ -57,11 +67,12 @@ public class LoginWithGoogleCommandHandler : IRequestHandler<LoginWithGoogleComm
 
             user = new User
             {
-                Email = googleUser.Email,
+                Email = email,
                 FullName = googleUser.Name,
                 AvatarUrl = googleUser.Picture,
                 GoogleId = googleUser.GoogleId,
-                RoleId = defaultRole.Id // Default role
+                RoleId = defaultRole.Id,
+                Role = defaultRole
             };
             
             await userRepository.InsertAsync(user);

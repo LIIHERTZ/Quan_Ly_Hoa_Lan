@@ -25,9 +25,10 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
 
     public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
+        var email = request.Email.Trim().ToLowerInvariant();
         var user = await _userRepository.FindOneAsync(
-            filters: new Expression<Func<User, bool>>[] { u => u.Email == request.Email },
-            includes: new Expression<Func<User, object>>[] { u => u.Role }
+            filters: new Expression<Func<User, bool>>[] { user => user.Email.ToLower() == email },
+            includes: new Expression<Func<User, object>>[] { user => user.Role! }
         );
         
         if (user == null || string.IsNullOrEmpty(user.PasswordHash))
@@ -63,7 +64,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResultDto>
             RefreshToken = authResult.RefreshToken,
             Email = user.Email,
             FullName = user.FullName,
-            Role = user.Role.Name
+            Role = user.Role!.Name
         };
     }
 }

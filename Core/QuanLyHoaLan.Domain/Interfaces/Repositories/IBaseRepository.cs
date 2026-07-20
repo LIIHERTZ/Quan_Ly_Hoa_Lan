@@ -21,7 +21,7 @@ public interface IBaseRepository<TEntity> where TEntity : BaseEntity
 
     Task<int> CountAsync(Expression<Func<TEntity, bool>>[]? filters = null);
 
-    Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null);
+    Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null, bool includeDeleted = false);
 
     Task<bool> ExistsAsync(Guid id);
 

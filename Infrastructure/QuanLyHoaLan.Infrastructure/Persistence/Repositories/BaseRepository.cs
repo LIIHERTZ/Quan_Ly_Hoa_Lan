@@ -57,9 +57,9 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return await query.CountAsync();
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null)
+    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null, bool includeDeleted = false)
     {
-        var query = Query();
+        var query = Query(includeDeleted);
         if (filters != null)
         {
             foreach (var filter in filters)
@@ -222,6 +222,8 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
             }
         }
 
+        query = ApplyOrdering(query, orderBy);
+
         if (skip > 0)
         {
             query = query.Skip(skip);
@@ -233,5 +235,38 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         }
 
         return query;
+    }
+
+    private static IQueryable<TEntity> ApplyOrdering(IQueryable<TEntity> query, string? orderBy)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy))
+        {
+            return query;
+        }
+
+        var parts = orderBy.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var property = typeof(TEntity).GetProperties()
+            .FirstOrDefault(candidate => string.Equals(candidate.Name, parts[0], StringComparison.OrdinalIgnoreCase));
+
+        if (property == null)
+        {
+            return query;
+        }
+
+        var parameter = Expression.Parameter(typeof(TEntity), "entity");
+        var propertyAccess = Expression.Property(parameter, property);
+        var keySelector = Expression.Lambda(propertyAccess, parameter);
+        var methodName = parts.Length > 1 && parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase)
+            ? nameof(Queryable.OrderByDescending)
+            : nameof(Queryable.OrderBy);
+
+        var orderedExpression = Expression.Call(
+            typeof(Queryable),
+            methodName,
+            [typeof(TEntity), property.PropertyType],
+            query.Expression,
+            Expression.Quote(keySelector));
+
+        return query.Provider.CreateQuery<TEntity>(orderedExpression);
     }
 }
