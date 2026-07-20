@@ -44,6 +44,7 @@ public class UploadImageCommandHandler : IRequestHandler<UploadImageCommand, Ima
         await _imageRepository.InsertAsync(uploadedImage, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        result.Id = uploadedImage.Id;
         return result;
     }
 }
