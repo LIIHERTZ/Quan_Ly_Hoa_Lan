@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using MediatR;
 using QuanLyHoaLan.Application.DTOs.User;
+using QuanLyHoaLan.Domain.Constants;
 using QuanLyHoaLan.Domain.Entities;
 using QuanLyHoaLan.Domain.Exceptions;
 using QuanLyHoaLan.Domain.Interfaces.Repositories;
@@ -37,14 +38,14 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
 
         Expression<Func<Role, bool>>[] roleFilters =
         [
-            role => role.Id == request.RoleId && role.IsActive
+            role => role.Code == RoleConstants.UserCode && role.IsActive
         ];
         var role = await _roleRepository.FindOneAsync(roleFilters);
         if (role == null)
         {
             throw new ValidationException(new Dictionary<string, string[]>
             {
-                [nameof(request.RoleId)] = ["Vai trò không tồn tại hoặc đã bị vô hiệu hóa."]
+                ["Role"] = ["Vai trò USER mặc định không tồn tại hoặc đã bị vô hiệu hóa."]
             });
         }
 

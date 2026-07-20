@@ -9,6 +9,5 @@ public class CreateUserCommand : IRequest<UserDto>
     public string FullName { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
-    public Guid RoleId { get; set; }
     public string? AvatarUrl { get; set; }
 }

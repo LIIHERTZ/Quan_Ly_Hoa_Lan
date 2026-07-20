@@ -23,9 +23,6 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.ConfirmPassword)
             .Equal(x => x.Password).WithMessage("Mật khẩu xác nhận không khớp.");
 
-        RuleFor(x => x.RoleId)
-            .NotEmpty().WithMessage("RoleId không được để trống.");
-
         RuleFor(x => x.AvatarUrl)
             .MaximumLength(2048).WithMessage("URL ảnh đại diện không được vượt quá 2048 ký tự.");
     }

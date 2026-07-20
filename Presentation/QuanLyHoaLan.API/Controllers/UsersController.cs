@@ -6,7 +6,6 @@ using QuanLyHoaLan.Application.Features.Users.Commands.DeleteUser;
 using QuanLyHoaLan.Application.Features.Users.Commands.ResetUserPassword;
 using QuanLyHoaLan.Application.Features.Users.Commands.UpdateUser;
 using QuanLyHoaLan.Application.Features.Users.Queries.GetUserById;
-using QuanLyHoaLan.Application.Features.Users.Queries.GetUserRoles;
 using QuanLyHoaLan.Application.Features.Users.Queries.GetUsers;
 using QuanLyHoaLan.Domain.Constants;
 
@@ -20,12 +19,6 @@ public class UsersController : BaseController
     public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query)
     {
         return OkResult(await Mediator.Send(query));
-    }
-
-    [HttpGet("roles")]
-    public async Task<IActionResult> GetRoles()
-    {
-        return OkResult(await Mediator.Send(new GetUserRolesQuery()));
     }
 
     [HttpGet("{id:guid}")]
