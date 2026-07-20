@@ -45,14 +45,7 @@ builder.Services.AddScoped<QuanLyHoaLan.Domain.Interfaces.Repositories.IUnitOfWo
 builder.Services.AddScoped<QuanLyHoaLan.Domain.Interfaces.Services.IDateTimeService, QuanLyHoaLan.Infrastructure.Services.DateTimeService>();
 
 // 2.2 Cloudinary Settings & Service
-builder.Services.AddOptions<QuanLyHoaLan.Infrastructure.Settings.CloudinarySettings>()
-    .Bind(builder.Configuration.GetSection("Cloudinary"))
-    .Validate(
-        settings => !string.IsNullOrWhiteSpace(settings.CloudName)
-            && !string.IsNullOrWhiteSpace(settings.ApiKey)
-            && !string.IsNullOrWhiteSpace(settings.ApiSecret),
-        "Cloudinary configuration is missing. Configure Cloudinary:CloudName, Cloudinary:ApiKey and Cloudinary:ApiSecret.")
-    .ValidateOnStart();
+builder.Services.Configure<QuanLyHoaLan.Infrastructure.Settings.CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddScoped<QuanLyHoaLan.Application.Interfaces.Services.IImageService, QuanLyHoaLan.Infrastructure.Services.CloudinaryService>();
 builder.Services.AddScoped<QuanLyHoaLan.Application.Interfaces.Services.IDocumentService, QuanLyHoaLan.Infrastructure.Services.CloudinaryService>();
 

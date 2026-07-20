@@ -12,9 +12,14 @@ namespace QuanLyHoaLan.Infrastructure.Services;
 public class CloudinaryService : IImageService, IDocumentService
 {
     private readonly Cloudinary _cloudinary;
+    private readonly bool _isConfigured;
 
     public CloudinaryService(IOptions<CloudinarySettings> config)
     {
+        _isConfigured = !string.IsNullOrWhiteSpace(config.Value.CloudName)
+            && !string.IsNullOrWhiteSpace(config.Value.ApiKey)
+            && !string.IsNullOrWhiteSpace(config.Value.ApiSecret);
+
         var acc = new Account(
             config.Value.CloudName,
             config.Value.ApiKey,
@@ -26,6 +31,7 @@ public class CloudinaryService : IImageService, IDocumentService
 
     public async Task<AppImageUploadResult?> UploadImageAsync(Stream fileStream, string fileName)
     {
+        EnsureConfigured();
         var uploadResult = new AppImageUploadResult();
 
         if (fileStream.Length > 0)
@@ -58,6 +64,7 @@ public class CloudinaryService : IImageService, IDocumentService
 
     public async Task<bool> DeleteImageAsync(string publicId)
     {
+        EnsureConfigured();
         var deleteParams = new DeletionParams(publicId);
         var result = await _cloudinary.DestroyAsync(deleteParams);
 
@@ -66,6 +73,7 @@ public class CloudinaryService : IImageService, IDocumentService
 
     public async Task<DocumentUploadResult?> UploadDocumentAsync(Stream fileStream, string fileName)
     {
+        EnsureConfigured();
         if (fileStream.Length == 0) return null;
 
         var uploadParams = new RawUploadParams
@@ -91,6 +99,7 @@ public class CloudinaryService : IImageService, IDocumentService
 
     public async Task<bool> DeleteDocumentAsync(string publicId)
     {
+        EnsureConfigured();
         var deleteParams = new DeletionParams(publicId)
         {
             ResourceType = ResourceType.Raw
@@ -98,5 +107,14 @@ public class CloudinaryService : IImageService, IDocumentService
         var result = await _cloudinary.DestroyAsync(deleteParams);
 
         return result.Result == "ok";
+    }
+
+    private void EnsureConfigured()
+    {
+        if (!_isConfigured)
+        {
+            throw new InvalidOperationException(
+                "Cloudinary is not configured. Set Cloudinary__CloudName, Cloudinary__ApiKey and Cloudinary__ApiSecret.");
+        }
     }
 }
