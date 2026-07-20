@@ -22,10 +22,11 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
             Name = "Authorization",
-            Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
+            Description = "Nhập JWT token. Swagger sẽ tự thêm tiền tố Bearer.",
             In = ParameterLocation.Header,
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer"
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
         });
 
         options.AddSecurityRequirement(new OpenApiSecurityRequirement

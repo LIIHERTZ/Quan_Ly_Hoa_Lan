@@ -40,7 +40,12 @@ public class CloudinaryService : IImageService, IDocumentService
 
             if (result.Error != null)
             {
-                return null;
+                throw new InvalidOperationException($"Cloudinary image upload failed: {result.Error.Message}");
+            }
+
+            if (result.SecureUrl == null || string.IsNullOrWhiteSpace(result.PublicId))
+            {
+                throw new InvalidOperationException("Cloudinary image upload did not return a URL or public ID.");
             }
 
             uploadResult.Url = result.SecureUrl.ToString();
