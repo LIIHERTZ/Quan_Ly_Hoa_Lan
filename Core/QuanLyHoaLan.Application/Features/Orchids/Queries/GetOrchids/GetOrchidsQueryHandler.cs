@@ -22,31 +22,39 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
 
     public async Task<PaginatedList<OrchidDto>> Handle(GetOrchidsQuery request, CancellationToken cancellationToken)
     {
-        Expression<Func<Orchid, bool>>[]? filters = null;
-        if (!string.IsNullOrEmpty(request.SearchTerm))
+        var filters = new List<Expression<Func<Orchid, bool>>>();
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            var searchLower = request.SearchTerm.ToLower();
-            filters = new Expression<Func<Orchid, bool>>[] 
-            { 
-                x => x.Name.ToLower().Contains(searchLower) || x.EnglishName.ToLower().Contains(searchLower) 
-            };
+            var searchLower = request.SearchTerm.Trim().ToLowerInvariant();
+            filters.Add(orchid => orchid.Name.ToLower().Contains(searchLower)
+                || orchid.EnglishName.ToLower().Contains(searchLower));
+        }
+
+        if (request.IsPopular.HasValue)
+        {
+            filters.Add(orchid => orchid.IsPopular == request.IsPopular.Value);
         }
 
         var skip = (request.PageNumber - 1) * request.PageSize;
 
-        string orderBy = "DisplayOrder, CreatedAt desc";
-        if (!string.IsNullOrEmpty(request.SortBy))
+        var sortBy = request.SortBy?.Trim().ToLowerInvariant() switch
         {
-            orderBy = request.SortBy;
-            if (request.SortDescending)
-            {
-                orderBy += " desc";
-            }
-        }
+            "name" => "Name",
+            "englishname" => "EnglishName",
+            "createdat" => "CreatedAt",
+            "ispopular" => "IsPopular",
+            _ => "DisplayOrder"
+        };
+        var orderBy = request.SortDescending ? $"{sortBy} desc" : sortBy;
 
         var includes = new Expression<Func<Orchid, object>>[] { x => x.Categories };
 
-        var result = await _orchidRepository.FindResultAsync(filters, orderBy, skip, request.PageSize, includes);
+        var result = await _orchidRepository.FindResultAsync(
+            filters.Count == 0 ? null : filters.ToArray(),
+            orderBy,
+            skip,
+            request.PageSize,
+            includes);
 
         var dtos = result.Items.Select(orchid => new OrchidDto
         {
