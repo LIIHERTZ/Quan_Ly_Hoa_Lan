@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.API.Models.Requests;
 using QuanLyHoaLan.Application.Features.Images.Commands.UploadImage;
 using QuanLyHoaLan.Application.Features.Images.Commands.DeleteImage;
+using QuanLyHoaLan.Domain.Constants;
 
 namespace QuanLyHoaLan.API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class ImagesController : BaseController
 {
     [HttpPost("upload")]
@@ -30,6 +31,7 @@ public class ImagesController : BaseController
         return OkResult(result);
     }
 
+    [Authorize(Roles = RoleConstants.Admin)]
     [HttpDelete("{publicId}")]
     public async Task<IActionResult> DeleteImage(string publicId)
     {
