@@ -12,7 +12,10 @@ public static class CorsServiceExtensions
         {
             options.AddPolicy(DefaultCorsPolicy, builder =>
             {
-                builder.WithOrigins("http://localhost:3000", "https://localhost:3000") // In production, replace with specific origins like: builder.WithOrigins("http://localhost:3000")
+                builder.WithOrigins(
+                           "http://localhost:3000",
+                           "https://localhost:3000",
+                           "https://hoa-lan.vercel.app")
                        .AllowAnyMethod()
                        .AllowAnyHeader();
             });
