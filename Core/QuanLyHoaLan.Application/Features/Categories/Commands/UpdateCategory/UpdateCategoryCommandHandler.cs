@@ -39,7 +39,12 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
 
         if (command.ParentId == command.Id)
         {
-            throw new Exception("Danh mục cha không hợp lệ (không thể tự làm cha của chính mình).");
+            throw new InvalidOperationException("Danh mục cha không hợp lệ (không thể tự làm cha của chính mình).");
+        }
+
+        if (command.ParentId.HasValue && !await _categoryRepository.ExistsAsync(command.ParentId.Value))
+        {
+            throw new InvalidOperationException("Danh mục cha không tồn tại hoặc đã bị xóa.");
         }
 
         category.Name = command.Name;

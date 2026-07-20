@@ -33,14 +33,14 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         bool hasSubCategories = await _categoryRepository.AnyAsync(subCatFilters);
         if (hasSubCategories)
         {
-            throw new Exception("Không thể xóa danh mục này vì vẫn còn danh mục con bên trong.");
+            throw new InvalidOperationException("Không thể xóa danh mục này vì vẫn còn danh mục con bên trong.");
         }
 
         Expression<Func<Orchid, bool>>[] orchidFilters = new Expression<Func<Orchid, bool>>[] { x => x.Categories.Any(c => c.Id == command.Id) };
         bool hasOrchids = await _orchidRepository.AnyAsync(orchidFilters);
         if (hasOrchids)
         {
-            throw new Exception("Không thể xóa danh mục này vì vẫn còn loài Lan đang thuộc danh mục.");
+            throw new InvalidOperationException("Không thể xóa danh mục này vì vẫn còn loài Lan đang thuộc danh mục.");
         }
 
         var result = await _categoryRepository.DeleteAsync(category, cancellationToken);

@@ -28,6 +28,11 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
             throw new Exception("Slug đã tồn tại.");
         }
 
+        if (command.ParentId.HasValue && !await _categoryRepository.ExistsAsync(command.ParentId.Value))
+        {
+            throw new InvalidOperationException("Danh mục cha không tồn tại hoặc đã bị xóa.");
+        }
+
         var category = new Category
         {
             Name = command.Name,
