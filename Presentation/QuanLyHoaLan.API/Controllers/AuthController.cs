@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.Application.Features.Auth.Commands.LoginWithGoogle;
 using QuanLyHoaLan.Application.Features.Auth.Commands.Login;
 using QuanLyHoaLan.Application.Features.Auth.Commands.Register;
-using Asp.Versioning;
 
 namespace QuanLyHoaLan.API.Controllers;
 
-[ApiVersion("1.0")]
 public class AuthController : BaseController
 {
     [AllowAnonymous]

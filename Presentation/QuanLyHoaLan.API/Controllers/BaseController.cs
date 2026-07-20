@@ -6,7 +6,7 @@ using QuanLyHoaLan.Application.Common.Models;
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiController]
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 [Produces("application/json")]
 public abstract class BaseController : ControllerBase
 {

@@ -82,7 +82,7 @@ builder.Services.AddAuthentication(options =>
 // 4. Rate Limiting & CORS & Swagger
 builder.Services.AddCorsConfiguration();
 builder.Services.AddRateLimitingConfiguration();
-builder.Services.AddSwaggerAndVersioning();
+builder.Services.AddSwaggerConfiguration();
 
 var app = builder.Build();
 
@@ -103,7 +103,7 @@ app.UseSwaggerUI();
 app.UseReDoc(options =>
 {
     options.DocumentTitle = "QuanLyHoaLan API Documentation";
-    options.SpecUrl = "/swagger/v1/swagger.json";
+    options.SpecUrl = "/swagger/api/swagger.json";
     options.RoutePrefix = "redocs";
 });
 

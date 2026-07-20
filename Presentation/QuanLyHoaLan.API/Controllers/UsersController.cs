@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.Application.Features.Users.Commands.CreateUser;
@@ -11,7 +10,6 @@ using QuanLyHoaLan.Domain.Constants;
 
 namespace QuanLyHoaLan.API.Controllers;
 
-[ApiVersion("1.0")]
 [Authorize(Roles = RoleConstants.Admin)]
 public class UsersController : BaseController
 {
@@ -31,7 +29,7 @@ public class UsersController : BaseController
     public async Task<IActionResult> CreateUser([FromBody] CreateUserCommand command)
     {
         var user = await Mediator.Send(command);
-        return CreatedAtAction(nameof(GetUserById), new { id = user.Id, version = "1" }, user);
+        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
     }
 
     [HttpPut("{id:guid}")]

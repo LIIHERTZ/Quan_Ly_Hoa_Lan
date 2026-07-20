@@ -1,4 +1,3 @@
-using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -8,16 +7,14 @@ namespace QuanLyHoaLan.API.Extensions;
 
 public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
-    private readonly IApiVersionDescriptionProvider _provider;
-
-    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) => _provider = provider;
-
     public void Configure(SwaggerGenOptions options)
     {
-        foreach (var description in _provider.ApiVersionDescriptions)
+        options.SwaggerDoc("api", new OpenApiInfo
         {
-            options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
-        }
+            Title = "QuanLyHoaLan API",
+            Version = "current",
+            Description = "API cho hệ thống Quản Lý Hoa Lan."
+        });
 
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
         {
@@ -43,22 +40,5 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                 Array.Empty<string>()
             }
         });
-    }
-
-    private static OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
-    {
-        var info = new OpenApiInfo
-        {
-            Title = "QuanLyHoaLan API",
-            Version = description.ApiVersion.ToString(),
-            Description = "API cho hệ thống Quản Lý Hoa Lan."
-        };
-
-        if (description.IsDeprecated)
-        {
-            info.Description += " This API version has been deprecated.";
-        }
-
-        return info;
     }
 }
