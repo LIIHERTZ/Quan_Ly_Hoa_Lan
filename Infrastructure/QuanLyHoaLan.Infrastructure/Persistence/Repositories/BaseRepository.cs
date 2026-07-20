@@ -46,7 +46,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>>[]? filters = null)
     {
-        var query = _dbSet.AsQueryable();
+        var query = Query();
         if (filters != null)
         {
             foreach (var filter in filters)
@@ -59,7 +59,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null)
     {
-        var query = _dbSet.AsQueryable();
+        var query = Query();
         if (filters != null)
         {
             foreach (var filter in filters)
@@ -84,12 +84,12 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<TEntity?> FindByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includes)
     {
-        var query = _dbSet.AsQueryable();
+        var query = Query();
         foreach (var include in includes)
         {
             query = query.Include(include);
         }
-        return await query.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
+        return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task<TEntity?> FindOneAsync(
@@ -204,7 +204,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         int limit,
         Expression<Func<TEntity, object>>[]? includes)
     {
-        var query = _dbSet.AsQueryable();
+        var query = Query();
 
         if (includes != null)
         {
