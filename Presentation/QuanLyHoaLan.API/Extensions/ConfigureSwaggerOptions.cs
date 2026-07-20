@@ -9,7 +9,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
     public void Configure(SwaggerGenOptions options)
     {
-        options.SwaggerDoc("api", new OpenApiInfo
+        options.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "QuanLyHoaLan API",
             Version = "current",

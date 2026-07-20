@@ -99,11 +99,14 @@ using (var scope = app.Services.CreateScope())
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyHoaLan API");
+});
 app.UseReDoc(options =>
 {
     options.DocumentTitle = "QuanLyHoaLan API Documentation";
-    options.SpecUrl = "/swagger/api/swagger.json";
+    options.SpecUrl = "/swagger/v1/swagger.json";
     options.RoutePrefix = "redocs";
 });
 
