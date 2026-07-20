@@ -1,5 +1,4 @@
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using QuanLyHoaLan.Application.Common.Models;
@@ -7,7 +6,6 @@ using QuanLyHoaLan.Application.Common.Models;
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiController]
-[AllowAnonymous]
 [Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 public abstract class BaseController : ControllerBase

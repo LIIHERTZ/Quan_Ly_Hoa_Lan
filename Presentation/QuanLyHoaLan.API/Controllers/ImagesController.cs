@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.API.Models.Requests;
@@ -8,6 +9,7 @@ using QuanLyHoaLan.Application.Features.Images.Commands.DeleteImage;
 namespace QuanLyHoaLan.API.Controllers;
 
 [ApiVersion("1.0")]
+[Authorize(Roles = "Admin")]
 public class ImagesController : BaseController
 {
     [HttpPost("upload")]
