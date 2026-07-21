@@ -19,6 +19,10 @@ public class Orchid : BaseEntity
     public bool HasFragrance { get; set; }
     public bool IsPopular { get; set; }
 
+    public List<string> Colors { get; set; } = new();
+    public List<string> Regions { get; set; } = new();
+    public List<string> BloomSeasons { get; set; } = new();
+
     public string Slug { get; set; } = string.Empty;
 
     // Danh mục hình ảnh: Lưu trữ ID của các ảnh trong bảng UploadedImage

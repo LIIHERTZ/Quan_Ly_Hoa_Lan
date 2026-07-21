@@ -16,6 +16,16 @@ public class OrchidConfiguration : IEntityTypeConfiguration<Orchid>
         builder.HasIndex(e => e.Slug).IsUnique();
         
         builder.Property(e => e.ShortDescription).HasMaxLength(1000);
+
+        builder.Property(e => e.Colors)
+            .HasColumnType("text[]")
+            .HasDefaultValueSql("ARRAY[]::text[]");
+        builder.Property(e => e.Regions)
+            .HasColumnType("text[]")
+            .HasDefaultValueSql("ARRAY[]::text[]");
+        builder.Property(e => e.BloomSeasons)
+            .HasColumnType("text[]")
+            .HasDefaultValueSql("ARRAY[]::text[]");
         
         builder.HasMany(e => e.Categories)
             .WithMany(c => c.Orchids);

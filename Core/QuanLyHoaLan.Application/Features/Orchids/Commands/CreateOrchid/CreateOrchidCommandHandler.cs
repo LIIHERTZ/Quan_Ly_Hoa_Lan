@@ -43,6 +43,9 @@ public class CreateOrchidCommandHandler : IRequestHandler<CreateOrchidCommand, G
             DetailedDescription = command.DetailedDescription,
             HasFragrance = command.HasFragrance,
             IsPopular = command.IsPopular,
+            Colors = NormalizeValues(command.Colors),
+            Regions = NormalizeValues(command.Regions),
+            BloomSeasons = NormalizeValues(command.BloomSeasons),
             Slug = command.Slug,
             UploadedImageIds = command.UploadedImageIds,
             DisplayOrder = command.DisplayOrder
@@ -59,5 +62,14 @@ public class CreateOrchidCommandHandler : IRequestHandler<CreateOrchidCommand, G
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return orchid.Id;
+    }
+
+    private static List<string> NormalizeValues(IEnumerable<string>? values)
+    {
+        return values?
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList() ?? new List<string>();
     }
 }

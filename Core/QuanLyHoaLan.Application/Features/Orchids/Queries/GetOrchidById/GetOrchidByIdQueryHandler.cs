@@ -39,6 +39,9 @@ public class GetOrchidByIdQueryHandler : IRequestHandler<GetOrchidByIdQuery, Orc
             DetailedDescription = orchid.DetailedDescription,
             HasFragrance = orchid.HasFragrance,
             IsPopular = orchid.IsPopular,
+            Colors = orchid.Colors,
+            Regions = orchid.Regions,
+            BloomSeasons = orchid.BloomSeasons,
             Slug = orchid.Slug,
             UploadedImageIds = orchid.UploadedImageIds,
             DisplayOrder = orchid.DisplayOrder

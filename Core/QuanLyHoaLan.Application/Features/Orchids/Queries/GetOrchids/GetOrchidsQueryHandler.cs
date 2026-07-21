@@ -35,6 +35,29 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             filters.Add(orchid => orchid.IsPopular == request.IsPopular.Value);
         }
 
+        if (request.HasFragrance.HasValue)
+        {
+            filters.Add(orchid => orchid.HasFragrance == request.HasFragrance.Value);
+        }
+
+        var colors = NormalizeValues(request.Colors);
+        if (colors.Count > 0)
+        {
+            filters.Add(orchid => orchid.Colors.Any(color => colors.Contains(color)));
+        }
+
+        var regions = NormalizeValues(request.Regions);
+        if (regions.Count > 0)
+        {
+            filters.Add(orchid => orchid.Regions.Any(region => regions.Contains(region)));
+        }
+
+        var bloomSeasons = NormalizeValues(request.BloomSeasons);
+        if (bloomSeasons.Count > 0)
+        {
+            filters.Add(orchid => orchid.BloomSeasons.Any(season => bloomSeasons.Contains(season)));
+        }
+
         var skip = (request.PageNumber - 1) * request.PageSize;
 
         var sortBy = request.SortBy?.Trim().ToLowerInvariant() switch
@@ -70,11 +93,23 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             DetailedDescription = orchid.DetailedDescription,
             HasFragrance = orchid.HasFragrance,
             IsPopular = orchid.IsPopular,
+            Colors = orchid.Colors,
+            Regions = orchid.Regions,
+            BloomSeasons = orchid.BloomSeasons,
             Slug = orchid.Slug,
             UploadedImageIds = orchid.UploadedImageIds,
             DisplayOrder = orchid.DisplayOrder
         }).ToList();
 
         return PaginatedList<OrchidDto>.Create(dtos, result.TotalCount, request.PageNumber, request.PageSize);
+    }
+
+    private static List<string> NormalizeValues(IEnumerable<string>? values)
+    {
+        return values?
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList() ?? new List<string>();
     }
 }
