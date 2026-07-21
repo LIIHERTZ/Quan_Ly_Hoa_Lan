@@ -1,91 +1,44 @@
 using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace QuanLyHoaLan.Application.DTOs.Orchid;
 
 [TypeConverter(typeof(RegionTypeConverter))]
 public enum Region
 {
-    [JsonStringEnumMemberName("Trung trung bộ và Miền núi phía Bắc")]
     NORTHERN_MIDLANDS_AND_MOUNTAINS,
-
-    [JsonStringEnumMemberName("Đồng bằng sông Hồng")]
     RED_RIVER_DELTA,
-
-    [JsonStringEnumMemberName("Bắc Trung Bộ")]
     NORTH_CENTRAL,
-
-    [JsonStringEnumMemberName("Duyên hải Nam Trung Bộ")]
     SOUTH_CENTRAL_COAST,
-
-    [JsonStringEnumMemberName("Tây Nguyên")]
     CENTRAL_HIGHLANDS,
-
-    [JsonStringEnumMemberName("Đông Nam Bộ")]
     SOUTHEAST,
-
-    [JsonStringEnumMemberName("Đồng bằng sông Cửu Long")]
     MEKONG_DELTA
 }
 
 [TypeConverter(typeof(BloomSeasonTypeConverter))]
 public enum BloomSeason
 {
-    [JsonStringEnumMemberName("Mùa xuân")]
     SPRING,
-
-    [JsonStringEnumMemberName("Mùa hạ")]
     SUMMER,
-
-    [JsonStringEnumMemberName("Mùa thu")]
     AUTUMN,
-
-    [JsonStringEnumMemberName("Mùa đông")]
     WINTER,
-
-    [JsonStringEnumMemberName("Quanh năm")]
     ALL_YEAR
 }
 
 [TypeConverter(typeof(FlowerColorTypeConverter))]
 public enum FlowerColor
 {
-    [JsonStringEnumMemberName("#FF0000")]
     RED,
-
-    [JsonStringEnumMemberName("#FFA500")]
     ORANGE,
-
-    [JsonStringEnumMemberName("#FFD700")]
     YELLOW,
-
-    [JsonStringEnumMemberName("#FFFFFF")]
     WHITE,
-
-    [JsonStringEnumMemberName("#FFC0CB")]
     PINK,
-
-    [JsonStringEnumMemberName("#800080")]
     PURPLE,
-
-    [JsonStringEnumMemberName("#008000")]
     GREEN,
-
-    [JsonStringEnumMemberName("#90EE90")]
     LIGHT_GREEN,
-
-    [JsonStringEnumMemberName("#0000FF")]
     BLUE,
-
-    [JsonStringEnumMemberName("#FFFDD0")]
     CREAM,
-
-    [JsonStringEnumMemberName("#A52A2A")]
     BROWN,
-
-    [JsonStringEnumMemberName("#000000")]
     BLACK
 }
 
@@ -94,9 +47,7 @@ public static class OrchidEnumValue
     public static string ToStorageValue<TEnum>(this TEnum value)
         where TEnum : struct, Enum
     {
-        var member = typeof(TEnum).GetMember(value.ToString()).Single();
-        return member.GetCustomAttribute<JsonStringEnumMemberNameAttribute>()?.Name
-            ?? value.ToString();
+        return value.ToString();
     }
 
     public static bool TryParse<TEnum>(string? value, out TEnum result)
@@ -114,15 +65,6 @@ public static class OrchidEnumValue
         if (enumName != null && Enum.TryParse(enumName, out result))
         {
             return true;
-        }
-
-        foreach (var candidate in Enum.GetValues<TEnum>())
-        {
-            if (string.Equals(candidate.ToStorageValue(), normalized, StringComparison.OrdinalIgnoreCase))
-            {
-                result = candidate;
-                return true;
-            }
         }
 
         return false;
