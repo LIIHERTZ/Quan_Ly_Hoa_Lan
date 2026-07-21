@@ -12,6 +12,7 @@ public class CreateArticleCommand : IRequest<Guid>
     public string Content { get; set; } = string.Empty;
     public Guid? ThumbnailImageId { get; set; }
     public bool IsPublished { get; set; }
+    public List<Guid> ArticleCategoryIds { get; set; } = new();
     public List<Guid> OrchidIds { get; set; } = new();
     public List<Guid> DocumentIds { get; set; } = new();
 }

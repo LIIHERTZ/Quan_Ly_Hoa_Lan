@@ -17,6 +17,8 @@ public class Article : BaseEntity
     public bool IsPublished { get; set; }
     public DateTimeOffset? PublishedAt { get; set; }
 
+    public virtual ICollection<ArticleCategory> Categories { get; set; } = new List<ArticleCategory>();
+
     // Array of Orchid IDs
     public List<Guid> OrchidIds { get; set; } = new();
 

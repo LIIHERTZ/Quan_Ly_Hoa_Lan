@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using MediatR;
 using QuanLyHoaLan.Application.Common.Models;
 using QuanLyHoaLan.Application.DTOs.Article;
+using QuanLyHoaLan.Application.Interfaces;
+using QuanLyHoaLan.Domain.Constants;
 using QuanLyHoaLan.Domain.Entities;
 using QuanLyHoaLan.Domain.Interfaces.Repositories;
 
@@ -14,38 +16,57 @@ namespace QuanLyHoaLan.Application.Features.Articles.Queries.GetArticles;
 public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, PaginatedList<ArticleDto>>
 {
     private readonly IBaseRepository<Article> _articleRepository;
+    private readonly IBaseRepository<ArticleCategory> _categoryRepository;
+    private readonly ICurrentUser _currentUser;
 
-    public GetArticlesQueryHandler(IBaseRepository<Article> articleRepository)
+    public GetArticlesQueryHandler(
+        IBaseRepository<Article> articleRepository,
+        IBaseRepository<ArticleCategory> categoryRepository,
+        ICurrentUser currentUser)
     {
         _articleRepository = articleRepository;
+        _categoryRepository = categoryRepository;
+        _currentUser = currentUser;
     }
 
     public async Task<PaginatedList<ArticleDto>> Handle(GetArticlesQuery request, CancellationToken cancellationToken)
     {
-        Expression<Func<Article, bool>>? filters = null;
+        var articleCategoryIds = await GetArticleCategoryIdsAsync(request);
+        var filterByArticleCategory = request.ArticleCategoryId.HasValue || request.CategoryType.HasValue;
+        var canViewDrafts = _currentUser.HasRole(RoleConstants.Admin);
         
         // Base filters
         var searchLower = request.SearchTerm?.ToLower();
-        filters = x => 
+        Expression<Func<Article, bool>> filters = x =>
             (string.IsNullOrEmpty(searchLower) || x.Title.ToLower().Contains(searchLower)) &&
-            (!request.IsPublished.HasValue || x.IsPublished == request.IsPublished.Value) &&
-            (!request.OrchidId.HasValue || x.OrchidIds.Contains(request.OrchidId.Value));
+            (canViewDrafts
+                ? (!request.IsPublished.HasValue || x.IsPublished == request.IsPublished.Value)
+                : x.IsPublished) &&
+            (!request.OrchidId.HasValue || x.OrchidIds.Contains(request.OrchidId.Value)) &&
+            (!filterByArticleCategory || x.Categories.Any(category => articleCategoryIds.Contains(category.Id)));
 
         var skip = (request.PageNumber - 1) * request.PageSize;
 
-        string orderBy = "PublishedAt desc, CreatedAt desc";
-        if (!string.IsNullOrEmpty(request.SortBy))
+        string orderBy;
+        if (string.IsNullOrWhiteSpace(request.SortBy))
         {
-            orderBy = request.SortBy;
-            if (request.SortDescending)
+            orderBy = "PublishedAt desc, CreatedAt desc";
+        }
+        else
+        {
+            var sortBy = request.SortBy.Trim().ToLowerInvariant() switch
             {
-                orderBy += " desc";
-            }
+                "title" => "Title",
+                "createdat" => "CreatedAt",
+                _ => "PublishedAt"
+            };
+            orderBy = request.SortDescending ? $"{sortBy} desc" : sortBy;
         }
 
         var includes = new Expression<Func<Article, object>>[] 
         { 
-            x => x.Author
+            x => x.Author,
+            x => x.Categories
         };
 
         var result = await _articleRepository.FindResultAsync(new[] { filters }, orderBy, skip, request.PageSize, includes);
@@ -62,10 +83,64 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
             AuthorName = article.Author?.FullName ?? string.Empty,
             IsPublished = article.IsPublished,
             PublishedAt = article.PublishedAt,
+            Categories = article.Categories
+                .Where(category => !category.IsDeleted)
+                .Select(category => new SimpleArticleCategoryDto
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Slug = category.Slug,
+                    Type = category.Type
+                }).ToList(),
             OrchidIds = article.OrchidIds,
             DocumentIds = article.DocumentIds
         }).ToList();
 
         return PaginatedList<ArticleDto>.Create(dtos, result.TotalCount, request.PageNumber, request.PageSize);
+    }
+
+    private async Task<List<Guid>> GetArticleCategoryIdsAsync(GetArticlesQuery request)
+    {
+        var categories = await _categoryRepository.FindAsync(limit: int.MaxValue);
+
+        if (!request.ArticleCategoryId.HasValue)
+        {
+            return request.CategoryType.HasValue
+                ? categories
+                    .Where(category => category.Type == request.CategoryType.Value)
+                    .Select(category => category.Id)
+                    .ToList()
+                : new List<Guid>();
+        }
+
+        var selectedCategory = categories.FirstOrDefault(
+            category => category.Id == request.ArticleCategoryId.Value);
+        if (selectedCategory == null
+            || (request.CategoryType.HasValue && selectedCategory.Type != request.CategoryType.Value))
+        {
+            throw new InvalidOperationException("Danh mục bài viết không tồn tại hoặc đã bị xóa.");
+        }
+
+        var result = new HashSet<Guid> { request.ArticleCategoryId.Value };
+        if (!request.IncludeDescendants)
+        {
+            return result.ToList();
+        }
+
+        var pending = new Queue<Guid>();
+        pending.Enqueue(request.ArticleCategoryId.Value);
+        while (pending.Count > 0)
+        {
+            var parentId = pending.Dequeue();
+            foreach (var child in categories.Where(category => category.ParentId == parentId))
+            {
+                if (result.Add(child.Id))
+                {
+                    pending.Enqueue(child.Id);
+                }
+            }
+        }
+
+        return result.ToList();
     }
 }

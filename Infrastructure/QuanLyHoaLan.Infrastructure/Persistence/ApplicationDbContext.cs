@@ -33,6 +33,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Orchid> Orchids { get; set; } = null!;
     public DbSet<Article> Articles { get; set; } = null!;
+    public DbSet<ArticleCategory> ArticleCategories { get; set; } = null!;
     public DbSet<DiscussionPost> DiscussionPosts => Set<DiscussionPost>();
     public DbSet<DiscussionComment> DiscussionComments => Set<DiscussionComment>();
     public DbSet<UploadedImage> UploadedImages { get; set; } = null!;

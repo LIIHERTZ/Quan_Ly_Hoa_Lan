@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuanLyHoaLan.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using QuanLyHoaLan.Infrastructure.Persistence;
 namespace QuanLyHoaLan.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721044931_AddArticleCategories")]
+    partial class AddArticleCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,19 +26,19 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ArticleCategoryMapping", b =>
+            modelBuilder.Entity("ArticleArticleCategory", b =>
                 {
-                    b.Property<Guid>("ArticleId")
+                    b.Property<Guid>("ArticlesId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ArticleCategoryId")
+                    b.Property<Guid>("CategoriesId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("ArticleId", "ArticleCategoryId");
+                    b.HasKey("ArticlesId", "CategoriesId");
 
-                    b.HasIndex("ArticleCategoryId");
+                    b.HasIndex("CategoriesId");
 
-                    b.ToTable("ArticleCategoryMappings", (string)null);
+                    b.ToTable("ArticleArticleCategories", (string)null);
                 });
 
             modelBuilder.Entity("CategoryOrchid", b =>
@@ -249,11 +252,6 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -264,7 +262,7 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.HasIndex("Type", "Slug")
+                    b.HasIndex("Slug")
                         .IsUnique()
                         .HasFilter("\"IsDeleted\" = false");
 
@@ -772,17 +770,17 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ArticleCategoryMapping", b =>
+            modelBuilder.Entity("ArticleArticleCategory", b =>
                 {
-                    b.HasOne("QuanLyHoaLan.Domain.Entities.ArticleCategory", null)
+                    b.HasOne("QuanLyHoaLan.Domain.Entities.Article", null)
                         .WithMany()
-                        .HasForeignKey("ArticleCategoryId")
+                        .HasForeignKey("ArticlesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("QuanLyHoaLan.Domain.Entities.Article", null)
+                    b.HasOne("QuanLyHoaLan.Domain.Entities.ArticleCategory", null)
                         .WithMany()
-                        .HasForeignKey("ArticleId")
+                        .HasForeignKey("CategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
