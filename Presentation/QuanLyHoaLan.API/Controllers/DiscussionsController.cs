@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLyHoaLan.Application.DTOs.Discussion;
 using QuanLyHoaLan.Application.Features.Discussions.Commands.CreateDiscussionComment;
 using QuanLyHoaLan.Application.Features.Discussions.Commands.CreateDiscussionPost;
+using QuanLyHoaLan.Application.Features.Discussions.Commands.DeleteDiscussionComment;
 using QuanLyHoaLan.Application.Features.Discussions.Commands.DeleteDiscussionPost;
 using QuanLyHoaLan.Application.Features.Discussions.Queries.GetDiscussionPostById;
 using QuanLyHoaLan.Application.Features.Discussions.Queries.GetDiscussionPosts;
@@ -63,5 +64,13 @@ public class DiscussionsController : ControllerBase
         };
         var commentId = await _mediator.Send(command);
         return Ok(commentId);
+    }
+
+    [HttpDelete("{postId}/comments/{commentId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteComment(Guid postId, Guid commentId)
+    {
+        await _mediator.Send(new DeleteDiscussionCommentCommand(postId, commentId));
+        return NoContent();
     }
 }
