@@ -53,6 +53,7 @@ public class GetArticleByIdQueryHandler : IRequestHandler<GetArticleByIdQuery, A
             AuthorName = article.Author?.FullName ?? string.Empty,
             IsPublished = article.IsPublished,
             PublishedAt = article.PublishedAt,
+            Type = article.Type,
             Categories = article.Categories
                 .Where(category => !category.IsDeleted)
                 .Select(category => new SimpleArticleCategoryDto

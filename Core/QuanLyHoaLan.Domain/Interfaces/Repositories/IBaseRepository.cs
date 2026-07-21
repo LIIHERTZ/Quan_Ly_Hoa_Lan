@@ -19,6 +19,13 @@ public interface IBaseRepository<TEntity> where TEntity : BaseEntity
         int limit = 0,
         Expression<Func<TEntity, object>>[]? includes = null);
 
+    Task<FindResult<TResult>> FindProjectedResultAsync<TResult>(
+        Expression<Func<TEntity, bool>>[]? filters,
+        string? orderBy,
+        int skip,
+        int limit,
+        Expression<Func<TEntity, TResult>> selector);
+
     Task<int> CountAsync(Expression<Func<TEntity, bool>>[]? filters = null);
 
     Task<bool> AnyAsync(Expression<Func<TEntity, bool>>[]? filters = null, bool includeDeleted = false);

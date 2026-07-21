@@ -43,7 +43,8 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
     {
         var article = await _articleRepository.FindByIdAsync(command.Id, item => item.Categories);
 
-        if (article == null)
+        if (article == null
+            || (command.ExpectedType.HasValue && article.Type != command.ExpectedType.Value))
         {
             throw new NotFoundException(nameof(Article), command.Id);
         }
@@ -60,8 +61,16 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
             }
         }
 
+        var articleType = command.Type!.Value;
+        if (article.Type != articleType)
+        {
+            throw new InvalidOperationException(
+                "Không thể đổi nhóm của bài viết sau khi đã tạo. Hãy tạo bài viết mới ở nhóm phù hợp.");
+        }
+
         var categories = await ArticleRelationValidator.GetLeafCategoriesAsync(
             command.ArticleCategoryIds,
+            articleType,
             _articleCategoryRepository);
         var orchidIds = await ArticleRelationValidator.EnsureIdsExistAsync(
             command.OrchidIds,
@@ -79,10 +88,11 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         var wasPublished = article.IsPublished;
         article.Title = command.Title.Trim();
         article.Slug = slug;
-        article.Summary = command.Summary.Trim();
+        article.Summary = command.Summary?.Trim() ?? string.Empty;
         article.Content = command.Content;
         article.ThumbnailImageId = command.ThumbnailImageId;
         article.IsPublished = command.IsPublished;
+        article.Type = articleType;
         article.Categories.Clear();
         foreach (var category in categories)
         {

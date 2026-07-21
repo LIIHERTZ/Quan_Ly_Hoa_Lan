@@ -1,4 +1,5 @@
 using QuanLyHoaLan.Domain.Common;
+using QuanLyHoaLan.Domain.Enums;
 
 namespace QuanLyHoaLan.Domain.Entities;
 
@@ -16,6 +17,7 @@ public class Article : BaseEntity
 
     public bool IsPublished { get; set; }
     public DateTimeOffset? PublishedAt { get; set; }
+    public ArticleCategoryType Type { get; set; }
 
     public virtual ICollection<ArticleCategory> Categories { get; set; } = new List<ArticleCategory>();
 

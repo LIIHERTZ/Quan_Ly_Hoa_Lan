@@ -6,6 +6,10 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
 {
     public CreateArticleCommandValidator()
     {
+        RuleFor(v => v.Type)
+            .NotNull().WithMessage("Loại bài viết không được để trống.")
+            .IsInEnum().WithMessage("Loại bài viết không hợp lệ.");
+
         RuleFor(v => v.Title)
             .MaximumLength(255).WithMessage("Title must not exceed 255 characters.")
             .NotEmpty().WithMessage("Title is required.");
@@ -20,6 +24,7 @@ public class CreateArticleCommandValidator : AbstractValidator<CreateArticleComm
             .NotEmpty().WithMessage("Content is required.");
 
         RuleFor(v => v.Summary)
+            .NotNull().WithMessage("Tóm tắt không được null.")
             .MaximumLength(500).WithMessage("Tóm tắt không được vượt quá 500 ký tự.");
 
         RuleFor(v => v.ArticleCategoryIds)

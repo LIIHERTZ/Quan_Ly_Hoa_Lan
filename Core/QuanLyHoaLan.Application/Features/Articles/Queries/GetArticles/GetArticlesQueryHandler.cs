@@ -13,7 +13,7 @@ using QuanLyHoaLan.Domain.Interfaces.Repositories;
 
 namespace QuanLyHoaLan.Application.Features.Articles.Queries.GetArticles;
 
-public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, PaginatedList<ArticleDto>>
+public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, PaginatedList<ArticleListDto>>
 {
     private readonly IBaseRepository<Article> _articleRepository;
     private readonly IBaseRepository<ArticleCategory> _categoryRepository;
@@ -29,10 +29,10 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
         _currentUser = currentUser;
     }
 
-    public async Task<PaginatedList<ArticleDto>> Handle(GetArticlesQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<ArticleListDto>> Handle(GetArticlesQuery request, CancellationToken cancellationToken)
     {
         var articleCategoryIds = await GetArticleCategoryIdsAsync(request);
-        var filterByArticleCategory = request.ArticleCategoryId.HasValue || request.CategoryType.HasValue;
+        var filterByArticleCategory = request.ArticleCategoryId.HasValue;
         var canViewDrafts = _currentUser.HasRole(RoleConstants.Admin);
         
         // Base filters
@@ -43,6 +43,7 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
                 ? (!request.IsPublished.HasValue || x.IsPublished == request.IsPublished.Value)
                 : x.IsPublished) &&
             (!request.OrchidId.HasValue || x.OrchidIds.Contains(request.OrchidId.Value)) &&
+            (!request.CategoryType.HasValue || x.Type == request.CategoryType.Value) &&
             (!filterByArticleCategory || x.Categories.Any(category => articleCategoryIds.Contains(category.Id)));
 
         var skip = (request.PageNumber - 1) * request.PageSize;
@@ -63,26 +64,18 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
             orderBy = request.SortDescending ? $"{sortBy} desc" : sortBy;
         }
 
-        var includes = new Expression<Func<Article, object>>[] 
-        { 
-            x => x.Author,
-            x => x.Categories
-        };
-
-        var result = await _articleRepository.FindResultAsync(new[] { filters }, orderBy, skip, request.PageSize, includes);
-
-        var dtos = result.Items.Select(article => new ArticleDto
+        Expression<Func<Article, ArticleListDto>> selector = article => new ArticleListDto
         {
             Id = article.Id,
             Title = article.Title,
             Slug = article.Slug,
             Summary = article.Summary,
-            Content = article.Content,
             ThumbnailImageId = article.ThumbnailImageId,
             AuthorId = article.AuthorId,
-            AuthorName = article.Author?.FullName ?? string.Empty,
+            AuthorName = article.Author.FullName,
             IsPublished = article.IsPublished,
             PublishedAt = article.PublishedAt,
+            Type = article.Type,
             Categories = article.Categories
                 .Where(category => !category.IsDeleted)
                 .Select(category => new SimpleArticleCategoryDto
@@ -94,24 +87,33 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
                 }).ToList(),
             OrchidIds = article.OrchidIds,
             DocumentIds = article.DocumentIds
-        }).ToList();
+        };
 
-        return PaginatedList<ArticleDto>.Create(dtos, result.TotalCount, request.PageNumber, request.PageSize);
+        var result = await _articleRepository.FindProjectedResultAsync(
+            [filters],
+            orderBy,
+            skip,
+            request.PageSize,
+            selector);
+
+        return PaginatedList<ArticleListDto>.Create(
+            result.Items,
+            result.TotalCount,
+            request.PageNumber,
+            request.PageSize);
     }
 
     private async Task<List<Guid>> GetArticleCategoryIdsAsync(GetArticlesQuery request)
     {
-        var categories = await _categoryRepository.FindAsync(limit: int.MaxValue);
-
         if (!request.ArticleCategoryId.HasValue)
         {
-            return request.CategoryType.HasValue
-                ? categories
-                    .Where(category => category.Type == request.CategoryType.Value)
-                    .Select(category => category.Id)
-                    .ToList()
-                : new List<Guid>();
+            return new List<Guid>();
         }
+
+        Expression<Func<ArticleCategory, bool>>[]? filters = request.CategoryType.HasValue
+            ? [category => category.Type == request.CategoryType.Value]
+            : null;
+        var categories = await _categoryRepository.FindAsync(filters, limit: int.MaxValue);
 
         var selectedCategory = categories.FirstOrDefault(
             category => category.Id == request.ArticleCategoryId.Value);

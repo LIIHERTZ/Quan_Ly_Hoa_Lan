@@ -44,6 +44,23 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         };
     }
 
+    public async Task<FindResult<TResult>> FindProjectedResultAsync<TResult>(
+        Expression<Func<TEntity, bool>>[]? filters,
+        string? orderBy,
+        int skip,
+        int limit,
+        Expression<Func<TEntity, TResult>> selector)
+    {
+        var query = BuildQuery(filters, orderBy, skip, limit, null);
+        var count = await CountAsync(filters);
+
+        return new FindResult<TResult>
+        {
+            TotalCount = count,
+            Items = await query.Select(selector).ToListAsync()
+        };
+    }
+
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>>[]? filters = null)
     {
         var query = Query();

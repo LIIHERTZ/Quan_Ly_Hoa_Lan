@@ -33,7 +33,25 @@ public class ArticleDto
 
     public bool IsPublished { get; set; }
     public DateTimeOffset? PublishedAt { get; set; }
+    public ArticleCategoryType Type { get; set; }
 
+    public List<SimpleArticleCategoryDto> Categories { get; set; } = new();
+    public List<Guid> OrchidIds { get; set; } = new();
+    public List<Guid> DocumentIds { get; set; } = new();
+}
+
+public class ArticleListDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
+    public Guid? ThumbnailImageId { get; set; }
+    public Guid AuthorId { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
+    public bool IsPublished { get; set; }
+    public DateTimeOffset? PublishedAt { get; set; }
+    public ArticleCategoryType Type { get; set; }
     public List<SimpleArticleCategoryDto> Categories { get; set; } = new();
     public List<Guid> OrchidIds { get; set; } = new();
     public List<Guid> DocumentIds { get; set; } = new();

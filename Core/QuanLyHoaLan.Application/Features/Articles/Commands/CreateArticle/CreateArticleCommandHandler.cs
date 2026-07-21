@@ -53,8 +53,10 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             throw new Exception("Slug đã tồn tại.");
         }
 
+        var articleType = command.Type!.Value;
         var categories = await ArticleRelationValidator.GetLeafCategoriesAsync(
             command.ArticleCategoryIds,
+            articleType,
             _articleCategoryRepository);
         var orchidIds = await ArticleRelationValidator.EnsureIdsExistAsync(
             command.OrchidIds,
@@ -73,11 +75,12 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
         {
             Title = command.Title.Trim(),
             Slug = slug,
-            Summary = command.Summary.Trim(),
+            Summary = command.Summary?.Trim() ?? string.Empty,
             Content = command.Content,
             ThumbnailImageId = command.ThumbnailImageId,
             IsPublished = command.IsPublished,
             PublishedAt = command.IsPublished ? _dateTime.Now : null,
+            Type = articleType,
             AuthorId = _currentUser.UserId,
             Categories = categories,
             OrchidIds = orchidIds,

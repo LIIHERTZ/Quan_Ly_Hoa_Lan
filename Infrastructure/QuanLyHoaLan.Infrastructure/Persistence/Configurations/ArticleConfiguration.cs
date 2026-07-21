@@ -27,6 +27,11 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.Content)
             .IsRequired();
 
+        builder.Property(x => x.Type)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .IsRequired();
+
         builder.HasOne(x => x.Author)
             .WithMany()
             .HasForeignKey(x => x.AuthorId)

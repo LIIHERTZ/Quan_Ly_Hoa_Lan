@@ -22,7 +22,7 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
     {
         var article = await _articleRepository.FindByIdAsync(request.Id);
 
-        if (article == null)
+        if (article == null || (request.Type.HasValue && article.Type != request.Type.Value))
         {
             throw new NotFoundException(nameof(Article), request.Id);
         }

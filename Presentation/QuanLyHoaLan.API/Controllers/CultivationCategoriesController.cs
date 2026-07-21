@@ -8,6 +8,8 @@ using QuanLyHoaLan.Application.Features.ArticleCategories.Queries.GetArticleCate
 using QuanLyHoaLan.Application.Features.ArticleCategories.Queries.GetArticleCategoryById;
 using QuanLyHoaLan.Application.Features.ArticleCategories.Queries.GetArticleCategoryTree;
 using QuanLyHoaLan.Application.Features.Articles.Queries.GetArticles;
+using QuanLyHoaLan.Application.Features.Articles.Commands.DeleteArticle;
+using QuanLyHoaLan.API.Models;
 using QuanLyHoaLan.Domain.Enums;
 
 namespace QuanLyHoaLan.API.Controllers;
@@ -62,6 +64,31 @@ public class CultivationCategoriesController : ControllerBase
         query.UseCategoryType(ArticleCategoryType.CULTIVATION);
         query.ArticleCategoryId = id;
         return Ok(await _mediator.Send(query));
+    }
+
+    [HttpPost("articles")]
+    public async Task<IActionResult> CreateArticle([FromBody] SectionArticleRequest request)
+    {
+        var command = request.ToCreateCommand(ArticleCategoryType.CULTIVATION);
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(ArticlesController.GetArticleById), "Articles", new { id }, id);
+    }
+
+    [HttpPut("articles/{articleId:guid}")]
+    public async Task<IActionResult> UpdateArticle(
+        Guid articleId,
+        [FromBody] SectionArticleRequest request)
+    {
+        var command = request.ToUpdateCommand(articleId, ArticleCategoryType.CULTIVATION);
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpDelete("articles/{articleId:guid}")]
+    public async Task<IActionResult> DeleteArticle(Guid articleId)
+    {
+        await _mediator.Send(new DeleteArticleCommand(articleId, ArticleCategoryType.CULTIVATION));
+        return NoContent();
     }
 
     [HttpPost]

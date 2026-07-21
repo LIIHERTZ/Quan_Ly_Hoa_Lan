@@ -47,7 +47,7 @@ public class UpdateArticleCategoryCommandHandler : IRequestHandler<UpdateArticle
         }
 
         category.Name = command.Name.Trim();
-        category.Description = command.Description.Trim();
+        category.Description = command.Description?.Trim() ?? string.Empty;
         category.Slug = slug;
         category.ParentId = command.ParentId;
 

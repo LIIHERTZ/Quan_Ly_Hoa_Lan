@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using QuanLyHoaLan.Application.Common.Models;
 using QuanLyHoaLan.Domain.Constants;
 using QuanLyHoaLan.Domain.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace QuanLyHoaLan.API.Middleware;
 
@@ -40,6 +42,13 @@ public class ErrorHandlingMiddleware
             UnauthorizedException unauthorizedException => (StatusCodes.Status401Unauthorized, ErrorCodes.UNAUTHORIZED, unauthorizedException.Message),
             NotFoundException notFoundException => (StatusCodes.Status404NotFound, ErrorCodes.NOT_FOUND, notFoundException.Message),
             InvalidOperationException invalidOperationException => (StatusCodes.Status400BadRequest, ErrorCodes.BAD_REQUEST, invalidOperationException.Message),
+            DbUpdateException { InnerException: PostgresException postgresException }
+                when postgresException.SqlState == PostgresErrorCodes.CheckViolation
+                    || postgresException.SqlState == PostgresErrorCodes.ForeignKeyViolation
+                => (StatusCodes.Status400BadRequest, ErrorCodes.BAD_REQUEST, "Dữ liệu vi phạm ràng buộc hệ thống."),
+            DbUpdateException { InnerException: PostgresException postgresException }
+                when postgresException.SqlState == PostgresErrorCodes.UniqueViolation
+                => (StatusCodes.Status409Conflict, ErrorCodes.CONFLICT, "Dữ liệu đã tồn tại."),
             _ => (StatusCodes.Status500InternalServerError, ErrorCodes.SERVER_ERROR, "Đã xảy ra lỗi hệ thống cục bộ. Vui lòng thử lại sau.")
         };
 

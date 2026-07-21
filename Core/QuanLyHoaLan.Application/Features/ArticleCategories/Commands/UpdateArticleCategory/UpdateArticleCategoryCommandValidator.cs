@@ -14,6 +14,7 @@ public class UpdateArticleCategoryCommandValidator : AbstractValidator<UpdateArt
             .MaximumLength(256).WithMessage("Tên danh mục không được vượt quá 256 ký tự.");
 
         RuleFor(command => command.Description)
+            .NotNull().WithMessage("Mô tả không được null.")
             .MaximumLength(1000).WithMessage("Mô tả không được vượt quá 1000 ký tự.");
 
         RuleFor(command => command.Slug)

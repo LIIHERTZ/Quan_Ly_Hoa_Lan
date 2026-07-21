@@ -6,6 +6,10 @@ public class UpdateArticleCommandValidator : AbstractValidator<UpdateArticleComm
 {
     public UpdateArticleCommandValidator()
     {
+        RuleFor(v => v.Type)
+            .NotNull().WithMessage("Loại bài viết không được để trống.")
+            .IsInEnum().WithMessage("Loại bài viết không hợp lệ.");
+
         RuleFor(v => v.Id)
             .NotEmpty().WithMessage("Id không được để trống.");
 
@@ -20,6 +24,7 @@ public class UpdateArticleCommandValidator : AbstractValidator<UpdateArticleComm
             .WithMessage("Slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang.");
             
         RuleFor(v => v.Summary)
+            .NotNull().WithMessage("Tóm tắt không được null.")
             .MaximumLength(500).WithMessage("Tóm tắt không được vượt quá 500 ký tự.");
 
         RuleFor(v => v.Content)

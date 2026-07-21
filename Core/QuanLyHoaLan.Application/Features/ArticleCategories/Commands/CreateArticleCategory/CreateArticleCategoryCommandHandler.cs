@@ -39,7 +39,7 @@ public class CreateArticleCategoryCommandHandler : IRequestHandler<CreateArticle
         var category = new ArticleCategory
         {
             Name = command.Name.Trim(),
-            Description = command.Description.Trim(),
+            Description = command.Description?.Trim() ?? string.Empty,
             Slug = slug,
             Type = command.Type,
             ParentId = command.ParentId

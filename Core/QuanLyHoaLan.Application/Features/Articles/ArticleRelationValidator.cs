@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using QuanLyHoaLan.Domain.Common;
 using QuanLyHoaLan.Domain.Entities;
 using QuanLyHoaLan.Domain.Interfaces.Repositories;
+using QuanLyHoaLan.Domain.Enums;
 
 namespace QuanLyHoaLan.Application.Features.Articles;
 
@@ -14,6 +15,7 @@ internal static class ArticleRelationValidator
 
     public static async Task<List<ArticleCategory>> GetLeafCategoriesAsync(
         IEnumerable<Guid>? ids,
+        ArticleCategoryType expectedType,
         IBaseRepository<ArticleCategory> categoryRepository)
     {
         var categoryIds = NormalizeIds(ids);
@@ -28,6 +30,13 @@ internal static class ArticleRelationValidator
         if (categories.Count != categoryIds.Count)
         {
             throw new InvalidOperationException("Có danh mục bài viết không tồn tại hoặc đã bị xóa.");
+        }
+
+
+        if (categories.Any(category => category.Type != expectedType))
+        {
+            throw new InvalidOperationException(
+                "Tất cả danh mục của bài viết phải thuộc cùng nhóm với loại bài viết.");
         }
 
         Expression<Func<ArticleCategory, bool>>[] childFilters =

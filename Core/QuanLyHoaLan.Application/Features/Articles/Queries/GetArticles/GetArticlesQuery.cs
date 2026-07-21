@@ -6,7 +6,7 @@ using QuanLyHoaLan.Domain.Enums;
 
 namespace QuanLyHoaLan.Application.Features.Articles.Queries.GetArticles;
 
-public class GetArticlesQuery : PagedRequest, IRequest<PaginatedList<ArticleDto>>
+public class GetArticlesQuery : PagedRequest, IRequest<PaginatedList<ArticleListDto>>
 {
     public Guid? OrchidId { get; set; }
     public Guid? ArticleCategoryId { get; set; }
