@@ -60,7 +60,7 @@ public class ArticlesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> DeleteArticle(Guid id)
     {
         var command = new DeleteArticleCommand(id);
