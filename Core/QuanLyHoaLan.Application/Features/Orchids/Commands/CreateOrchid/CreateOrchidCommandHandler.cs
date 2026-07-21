@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using QuanLyHoaLan.Application.DTOs.Orchid;
 using QuanLyHoaLan.Domain.Entities;
 using QuanLyHoaLan.Domain.Interfaces.Repositories;
 
@@ -64,12 +65,12 @@ public class CreateOrchidCommandHandler : IRequestHandler<CreateOrchidCommand, G
         return orchid.Id;
     }
 
-    private static List<string> NormalizeValues(IEnumerable<string>? values)
+    private static List<string> NormalizeValues<TEnum>(IEnumerable<TEnum>? values)
+        where TEnum : struct, Enum
     {
         return values?
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Distinct()
+            .Select(value => value.ToStorageValue())
             .ToList() ?? new List<string>();
     }
 }

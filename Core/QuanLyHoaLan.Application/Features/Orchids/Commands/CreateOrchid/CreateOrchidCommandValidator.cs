@@ -17,22 +17,22 @@ public class CreateOrchidCommandValidator : AbstractValidator<CreateOrchidComman
         RuleFor(command => command.CategoryIds)
             .NotEmpty().WithMessage("Danh mục không được để trống.");
 
-        AddStringListRules(command => command.Colors, "Màu sắc");
-        AddStringListRules(command => command.Regions, "Vùng phân bố");
-        AddStringListRules(command => command.BloomSeasons, "Mùa ra hoa");
-    }
+        RuleFor(command => command.Colors)
+            .NotNull().WithMessage("Màu sắc không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Màu sắc không được vượt quá 50 giá trị.");
+        RuleForEach(command => command.Colors).IsInEnum();
 
-    private void AddStringListRules(
-        System.Linq.Expressions.Expression<Func<CreateOrchidCommand, IEnumerable<string>>> selector,
-        string fieldName)
-    {
-        RuleFor(selector)
-            .NotNull().WithMessage($"{fieldName} không được null.")
-            .Must(values => values == null || values.Count() <= 50)
-            .WithMessage($"{fieldName} không được vượt quá 50 giá trị.");
+        RuleFor(command => command.Regions)
+            .NotNull().WithMessage("Vùng phân bố không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Vùng phân bố không được vượt quá 50 giá trị.");
+        RuleForEach(command => command.Regions).IsInEnum();
 
-        RuleForEach(selector)
-            .NotEmpty().WithMessage($"Giá trị {fieldName.ToLowerInvariant()} không được để trống.")
-            .MaximumLength(200).WithMessage($"Mỗi giá trị {fieldName.ToLowerInvariant()} không được vượt quá 200 ký tự.");
+        RuleFor(command => command.BloomSeasons)
+            .NotNull().WithMessage("Mùa ra hoa không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Mùa ra hoa không được vượt quá 50 giá trị.");
+        RuleForEach(command => command.BloomSeasons).IsInEnum();
     }
 }

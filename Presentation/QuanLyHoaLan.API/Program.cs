@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,6 +20,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new QuanLyHoaLan.API.Serialization.DateTimeUtcConverter());
         options.JsonSerializerOptions.Converters.Add(new QuanLyHoaLan.API.Serialization.NullableDateTimeUtcConverter());
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
     });
 
 // 1. Register Application MediatR

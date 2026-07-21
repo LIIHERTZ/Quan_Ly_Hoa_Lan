@@ -93,9 +93,9 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             DetailedDescription = orchid.DetailedDescription,
             HasFragrance = orchid.HasFragrance,
             IsPopular = orchid.IsPopular,
-            Colors = orchid.Colors,
-            Regions = orchid.Regions,
-            BloomSeasons = orchid.BloomSeasons,
+            Colors = OrchidEnumValue.ParseStoredValues<FlowerColor>(orchid.Colors),
+            Regions = OrchidEnumValue.ParseStoredValues<Region>(orchid.Regions),
+            BloomSeasons = OrchidEnumValue.ParseStoredValues<BloomSeason>(orchid.BloomSeasons),
             Slug = orchid.Slug,
             UploadedImageIds = orchid.UploadedImageIds,
             DisplayOrder = orchid.DisplayOrder
@@ -104,12 +104,12 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
         return PaginatedList<OrchidDto>.Create(dtos, result.TotalCount, request.PageNumber, request.PageSize);
     }
 
-    private static List<string> NormalizeValues(IEnumerable<string>? values)
+    private static List<string> NormalizeValues<TEnum>(IEnumerable<TEnum>? values)
+        where TEnum : struct, Enum
     {
         return values?
-            .Where(value => !string.IsNullOrWhiteSpace(value))
-            .Select(value => value.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Distinct()
+            .Select(value => value.ToStorageValue())
             .ToList() ?? new List<string>();
     }
 }

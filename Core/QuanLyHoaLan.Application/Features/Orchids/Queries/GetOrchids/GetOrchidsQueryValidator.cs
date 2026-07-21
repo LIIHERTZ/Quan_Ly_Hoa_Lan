@@ -29,22 +29,22 @@ public class GetOrchidsQueryValidator : AbstractValidator<GetOrchidsQuery>
                 || AllowedSortFields.Contains(sortBy.Trim().ToLowerInvariant()))
             .WithMessage("SortBy chỉ hỗ trợ: name, englishName, displayOrder, createdAt, isPopular.");
 
-        AddStringListRules(query => query.Colors, "Màu sắc");
-        AddStringListRules(query => query.Regions, "Vùng phân bố");
-        AddStringListRules(query => query.BloomSeasons, "Mùa ra hoa");
-    }
+        RuleFor(query => query.Colors)
+            .NotNull().WithMessage("Màu sắc không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Màu sắc không được vượt quá 50 giá trị.");
+        RuleForEach(query => query.Colors).IsInEnum();
 
-    private void AddStringListRules(
-        System.Linq.Expressions.Expression<Func<GetOrchidsQuery, IEnumerable<string>>> selector,
-        string fieldName)
-    {
-        RuleFor(selector)
-            .NotNull().WithMessage($"{fieldName} không được null.")
-            .Must(values => values == null || values.Count() <= 50)
-            .WithMessage($"{fieldName} không được vượt quá 50 giá trị.");
+        RuleFor(query => query.Regions)
+            .NotNull().WithMessage("Vùng phân bố không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Vùng phân bố không được vượt quá 50 giá trị.");
+        RuleForEach(query => query.Regions).IsInEnum();
 
-        RuleForEach(selector)
-            .NotEmpty().WithMessage($"Giá trị {fieldName.ToLowerInvariant()} không được để trống.")
-            .MaximumLength(200).WithMessage($"Mỗi giá trị {fieldName.ToLowerInvariant()} không được vượt quá 200 ký tự.");
+        RuleFor(query => query.BloomSeasons)
+            .NotNull().WithMessage("Mùa ra hoa không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Mùa ra hoa không được vượt quá 50 giá trị.");
+        RuleForEach(query => query.BloomSeasons).IsInEnum();
     }
 }
