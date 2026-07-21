@@ -11,10 +11,14 @@ namespace QuanLyHoaLan.Application.Features.Orchids.Queries.GetOrchidById;
 public class GetOrchidByIdQueryHandler : IRequestHandler<GetOrchidByIdQuery, OrchidDto>
 {
     private readonly IBaseRepository<Orchid> _orchidRepository;
+    private readonly IBaseRepository<UploadedImage> _imageRepository;
 
-    public GetOrchidByIdQueryHandler(IBaseRepository<Orchid> orchidRepository)
+    public GetOrchidByIdQueryHandler(
+        IBaseRepository<Orchid> orchidRepository,
+        IBaseRepository<UploadedImage> imageRepository)
     {
         _orchidRepository = orchidRepository;
+        _imageRepository = imageRepository;
     }
 
     public async Task<OrchidDto> Handle(GetOrchidByIdQuery request, CancellationToken cancellationToken)
@@ -24,6 +28,13 @@ public class GetOrchidByIdQueryHandler : IRequestHandler<GetOrchidByIdQuery, Orc
         {
             throw new Exception($"Không tìm thấy Orchid với Id {request.Id}.");
         }
+
+        var images = orchid.UploadedImageIds.Count == 0
+            ? new List<UploadedImage>()
+            : await _imageRepository.FindAsync(
+                [image => orchid.UploadedImageIds.Contains(image.Id)],
+                limit: int.MaxValue);
+        var imagesById = images.ToDictionary(image => image.Id);
 
         return new OrchidDto
         {
@@ -44,7 +55,22 @@ public class GetOrchidByIdQueryHandler : IRequestHandler<GetOrchidByIdQuery, Orc
             BloomSeasons = OrchidEnumValue.ParseStoredValues<BloomSeason>(orchid.BloomSeasons),
             Slug = orchid.Slug,
             UploadedImageIds = orchid.UploadedImageIds,
+            UploadedImages = orchid.UploadedImageIds
+                .Where(imagesById.ContainsKey)
+                .Select(imageId => MapImage(imagesById[imageId]))
+                .ToList(),
             DisplayOrder = orchid.DisplayOrder
+        };
+    }
+
+    private static OrchidImageDto MapImage(UploadedImage image)
+    {
+        return new OrchidImageDto
+        {
+            Id = image.Id,
+            Url = image.Url,
+            PublicId = image.PublicId,
+            FileName = image.FileName
         };
     }
 }

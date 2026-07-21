@@ -9,6 +9,14 @@ public class SimpleCategoryDto
     public string Name { get; set; } = string.Empty;
 }
 
+public class OrchidImageDto
+{
+    public Guid Id { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public string PublicId { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+}
+
 public class OrchidDto
 {
     public Guid Id { get; set; }
@@ -24,5 +32,6 @@ public class OrchidDto
     public List<BloomSeason> BloomSeasons { get; set; } = new();
     public string Slug { get; set; } = string.Empty;
     public List<Guid> UploadedImageIds { get; set; } = new List<Guid>();
+    public List<OrchidImageDto> UploadedImages { get; set; } = new List<OrchidImageDto>();
     public int DisplayOrder { get; set; }
 }

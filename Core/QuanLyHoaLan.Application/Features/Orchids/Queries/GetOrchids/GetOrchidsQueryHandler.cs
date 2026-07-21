@@ -14,10 +14,14 @@ namespace QuanLyHoaLan.Application.Features.Orchids.Queries.GetOrchids;
 public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, PaginatedList<OrchidDto>>
 {
     private readonly IBaseRepository<Orchid> _orchidRepository;
+    private readonly IBaseRepository<UploadedImage> _imageRepository;
 
-    public GetOrchidsQueryHandler(IBaseRepository<Orchid> orchidRepository)
+    public GetOrchidsQueryHandler(
+        IBaseRepository<Orchid> orchidRepository,
+        IBaseRepository<UploadedImage> imageRepository)
     {
         _orchidRepository = orchidRepository;
+        _imageRepository = imageRepository;
     }
 
     public async Task<PaginatedList<OrchidDto>> Handle(GetOrchidsQuery request, CancellationToken cancellationToken)
@@ -79,6 +83,15 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             request.PageSize,
             includes);
 
+        var imageIds = result.Items
+            .SelectMany(orchid => orchid.UploadedImageIds)
+            .Distinct()
+            .ToList();
+        var images = imageIds.Count == 0
+            ? new List<UploadedImage>()
+            : await _imageRepository.FindAsync([image => imageIds.Contains(image.Id)], limit: int.MaxValue);
+        var imagesById = images.ToDictionary(image => image.Id);
+
         var dtos = result.Items.Select(orchid => new OrchidDto
         {
             Id = orchid.Id,
@@ -98,10 +111,25 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             BloomSeasons = OrchidEnumValue.ParseStoredValues<BloomSeason>(orchid.BloomSeasons),
             Slug = orchid.Slug,
             UploadedImageIds = orchid.UploadedImageIds,
+            UploadedImages = orchid.UploadedImageIds
+                .Where(imagesById.ContainsKey)
+                .Select(imageId => MapImage(imagesById[imageId]))
+                .ToList(),
             DisplayOrder = orchid.DisplayOrder
         }).ToList();
 
         return PaginatedList<OrchidDto>.Create(dtos, result.TotalCount, request.PageNumber, request.PageSize);
+    }
+
+    private static OrchidImageDto MapImage(UploadedImage image)
+    {
+        return new OrchidImageDto
+        {
+            Id = image.Id,
+            Url = image.Url,
+            PublicId = image.PublicId,
+            FileName = image.FileName
+        };
     }
 
     private static List<string> NormalizeValues<TEnum>(IEnumerable<TEnum>? values)
