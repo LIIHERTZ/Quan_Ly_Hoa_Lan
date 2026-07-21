@@ -1,0 +1,2 @@
+# Local development settings can contain database and third-party credentials.
+appsettings.Development.json
