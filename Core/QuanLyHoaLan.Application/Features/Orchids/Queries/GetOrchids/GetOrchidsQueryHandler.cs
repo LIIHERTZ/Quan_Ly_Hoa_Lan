@@ -7,6 +7,7 @@ using MediatR;
 using QuanLyHoaLan.Application.Common.Models;
 using QuanLyHoaLan.Application.DTOs.Orchid;
 using QuanLyHoaLan.Domain.Entities;
+using QuanLyHoaLan.Domain.Exceptions;
 using QuanLyHoaLan.Domain.Interfaces.Repositories;
 
 namespace QuanLyHoaLan.Application.Features.Orchids.Queries.GetOrchids;
@@ -15,13 +16,16 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
 {
     private readonly IBaseRepository<Orchid> _orchidRepository;
     private readonly IBaseRepository<UploadedImage> _imageRepository;
+    private readonly IBaseRepository<Category> _categoryRepository;
 
     public GetOrchidsQueryHandler(
         IBaseRepository<Orchid> orchidRepository,
-        IBaseRepository<UploadedImage> imageRepository)
+        IBaseRepository<UploadedImage> imageRepository,
+        IBaseRepository<Category> categoryRepository)
     {
         _orchidRepository = orchidRepository;
         _imageRepository = imageRepository;
+        _categoryRepository = categoryRepository;
     }
 
     public async Task<PaginatedList<OrchidDto>> Handle(GetOrchidsQuery request, CancellationToken cancellationToken)
@@ -42,6 +46,13 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
         if (request.HasFragrance.HasValue)
         {
             filters.Add(orchid => orchid.HasFragrance == request.HasFragrance.Value);
+        }
+
+        var expandedCategoryIds = await ExpandCategoryIdsAsync(request.CategoryIds);
+        if (expandedCategoryIds.Count > 0)
+        {
+            filters.Add(orchid => orchid.Categories.Any(
+                category => expandedCategoryIds.Contains(category.Id)));
         }
 
         var colors = NormalizeValues(request.Colors);
@@ -130,6 +141,52 @@ public class GetOrchidsQueryHandler : IRequestHandler<GetOrchidsQuery, Paginated
             PublicId = image.PublicId,
             FileName = image.FileName
         };
+    }
+
+    private async Task<List<Guid>> ExpandCategoryIdsAsync(IEnumerable<Guid>? requestedIds)
+    {
+        var selectedIds = requestedIds?.Distinct().ToList() ?? new List<Guid>();
+        if (selectedIds.Count == 0)
+        {
+            return new List<Guid>();
+        }
+
+        var categories = await _categoryRepository.FindAsync(limit: int.MaxValue);
+        var existingIds = categories.Select(category => category.Id).ToHashSet();
+        var missingIds = selectedIds.Where(id => !existingIds.Contains(id)).ToList();
+        if (missingIds.Count > 0)
+        {
+            throw new ValidationException(new Dictionary<string, string[]>
+            {
+                [nameof(GetOrchidsQuery.CategoryIds)] =
+                ["Một hoặc nhiều danh mục không tồn tại hoặc đã bị xóa."]
+            });
+        }
+
+        var childrenByParentId = categories
+            .Where(category => category.ParentId.HasValue)
+            .GroupBy(category => category.ParentId!.Value)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(category => category.Id).ToList());
+
+        var expandedIds = new HashSet<Guid>();
+        var pendingIds = new Queue<Guid>(selectedIds);
+        while (pendingIds.TryDequeue(out var categoryId))
+        {
+            if (!expandedIds.Add(categoryId)
+                || !childrenByParentId.TryGetValue(categoryId, out var childIds))
+            {
+                continue;
+            }
+
+            foreach (var childId in childIds)
+            {
+                pendingIds.Enqueue(childId);
+            }
+        }
+
+        return expandedIds.ToList();
     }
 
     private static List<string> NormalizeValues<TEnum>(IEnumerable<TEnum>? values)

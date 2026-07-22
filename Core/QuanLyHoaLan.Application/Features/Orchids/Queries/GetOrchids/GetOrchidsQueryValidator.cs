@@ -29,6 +29,15 @@ public class GetOrchidsQueryValidator : AbstractValidator<GetOrchidsQuery>
                 || AllowedSortFields.Contains(sortBy.Trim().ToLowerInvariant()))
             .WithMessage("SortBy chỉ hỗ trợ: name, englishName, displayOrder, createdAt, isPopular.");
 
+        RuleFor(query => query.CategoryIds)
+            .NotNull().WithMessage("Danh mục không được null.")
+            .Must(values => values == null || values.Count <= 50)
+            .WithMessage("Không được lọc quá 50 danh mục.")
+            .Must(values => values == null || values.Count == values.Distinct().Count())
+            .WithMessage("Danh mục lọc không được trùng lặp.");
+        RuleForEach(query => query.CategoryIds)
+            .NotEmpty().WithMessage("ID danh mục không hợp lệ.");
+
         RuleFor(query => query.Colors)
             .NotNull().WithMessage("Màu sắc không được null.")
             .Must(values => values == null || values.Count <= 50)
