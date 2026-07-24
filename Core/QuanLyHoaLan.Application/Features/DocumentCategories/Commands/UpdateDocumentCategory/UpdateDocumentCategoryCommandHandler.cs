@@ -33,12 +33,27 @@ public class UpdateDocumentCategoryCommandHandler
             throw new NotFoundException(nameof(DocumentCategory), command.Id);
         }
 
+        var name = command.Name.Trim();
+        var normalizedName = name.ToLowerInvariant();
         var slug = command.Slug.Trim().ToLowerInvariant();
         Expression<Func<DocumentCategory, bool>>[] slugFilter =
             [item => item.Id != command.Id && item.Slug == slug];
         if (await _categoryRepository.AnyAsync(slugFilter))
         {
             throw new InvalidOperationException("Slug danh mục tài liệu đã tồn tại.");
+        }
+
+        Expression<Func<DocumentCategory, bool>>[] nameFilter =
+        [
+            item =>
+                item.Id != command.Id &&
+                item.ParentId == command.ParentId &&
+                item.Name.ToLower() == normalizedName
+        ];
+        if (await _categoryRepository.AnyAsync(nameFilter))
+        {
+            throw new InvalidOperationException(
+                "Tên danh mục đã tồn tại trong cùng một danh mục cha.");
         }
 
         var categories = await _categoryRepository.FindAsync(limit: int.MaxValue);
@@ -48,7 +63,7 @@ public class UpdateDocumentCategoryCommandHandler
             await EnsureParentIsNotUsedByDocument(command.ParentId);
         }
 
-        category.Name = command.Name.Trim();
+        category.Name = name;
         category.Description = command.Description?.Trim() ?? string.Empty;
         category.Slug = slug;
         category.ParentId = command.ParentId;

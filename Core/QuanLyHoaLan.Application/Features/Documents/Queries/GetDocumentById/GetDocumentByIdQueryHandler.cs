@@ -21,7 +21,7 @@ public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery,
     {
         var document = await _documentRepository.FindByIdAsync(
             request.Id,
-            item => item.Category);
+            item => item.Category!);
         if (document == null)
         {
             throw new NotFoundException(nameof(AppDocument), request.Id);
@@ -37,8 +37,8 @@ public class GetDocumentByIdQueryHandler : IRequestHandler<GetDocumentByIdQuery,
             SizeBytes = document.SizeBytes,
             Url = document.Url,
             CategoryId = document.CategoryId,
-            CategoryName = document.Category.Name,
-            CategorySlug = document.Category.Slug,
+            CategoryName = document.Category?.Name ?? string.Empty,
+            CategorySlug = document.Category?.Slug ?? string.Empty,
             CreatedAt = document.CreatedAt
         };
     }

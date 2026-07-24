@@ -42,7 +42,9 @@ public class GetDocumentsQueryHandler
             var categoryIds = DocumentCategoryTree.ExpandWithDescendants(
                 request.CategoryId.Value,
                 categories);
-            filters.Add(document => categoryIds.Contains(document.CategoryId));
+            filters.Add(document =>
+                document.CategoryId.HasValue &&
+                categoryIds.Contains(document.CategoryId.Value));
         }
 
         var result = await _documentRepository.FindResultAsync(
@@ -50,7 +52,7 @@ public class GetDocumentsQueryHandler
             "CreatedAt descending",
             (request.PageNumber - 1) * request.PageSize,
             request.PageSize,
-            [document => document.Category]);
+            [document => document.Category!]);
 
         var dtos = result.Items.Select(document => new AppDocumentDto
         {
@@ -62,8 +64,8 @@ public class GetDocumentsQueryHandler
             SizeBytes = document.SizeBytes,
             Url = document.Url,
             CategoryId = document.CategoryId,
-            CategoryName = document.Category.Name,
-            CategorySlug = document.Category.Slug,
+            CategoryName = document.Category?.Name ?? string.Empty,
+            CategorySlug = document.Category?.Slug ?? string.Empty,
             CreatedAt = document.CreatedAt
         }).ToList();
 

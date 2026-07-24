@@ -40,6 +40,8 @@ public class GetDocumentCategoryByIdQueryHandler
             limit: int.MaxValue,
             selector: document => document.CategoryId);
         var documentCounts = documentCategoryIds.Items
+            .Where(categoryId => categoryId.HasValue)
+            .Select(categoryId => categoryId!.Value)
             .GroupBy(categoryId => categoryId)
             .ToDictionary(group => group.Key, group => group.Count());
 

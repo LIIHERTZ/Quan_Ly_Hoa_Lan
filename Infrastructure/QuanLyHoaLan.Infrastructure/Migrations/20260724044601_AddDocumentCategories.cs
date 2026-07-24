@@ -41,41 +41,11 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            var researchId = new Guid("10000000-0000-0000-0000-000000000001");
-            var journalId = new Guid("10000000-0000-0000-0000-000000000002");
-            var generalId = new Guid("10000000-0000-0000-0000-000000000003");
-            var createdAt = new DateTime(2026, 7, 24, 0, 0, 0, DateTimeKind.Utc);
-
-            migrationBuilder.InsertData(
-                table: "DocumentCategories",
-                columns:
-                [
-                    "Id", "Name", "Description", "Slug", "ParentId", "No",
-                    "ConcurrencyStamp", "CreatedAt", "CreatedBy", "UpdatedAt",
-                    "UpdatedBy", "IsDeleted", "DeletedAt", "DeletedBy"
-                ],
-                values: new object[,]
-                {
-                    {
-                        researchId, "Nghiên cứu", "", "nghien-cuu", null, 0,
-                        researchId, createdAt, null, null, null, false, null, null
-                    },
-                    {
-                        journalId, "Tạp chí", "", "tap-chi", null, 0,
-                        journalId, createdAt, null, null, null, false, null, null
-                    },
-                    {
-                        generalId, "Tài liệu tổng hợp", "", "tai-lieu-tong-hop", null, 0,
-                        generalId, createdAt, null, null, null, false, null, null
-                    }
-                });
-
             migrationBuilder.AddColumn<Guid>(
                 name: "CategoryId",
                 table: "AppDocuments",
                 type: "uuid",
-                nullable: false,
-                defaultValue: generalId);
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppDocuments_CategoryId",
@@ -109,6 +79,10 @@ namespace QuanLyHoaLan.Infrastructure.Migrations
                 BEGIN
                     IF NEW."IsDeleted" THEN
                         RETURN NEW;
+                    END IF;
+
+                    IF NEW."CategoryId" IS NULL THEN
+                        RAISE EXCEPTION 'Document category is required.';
                     END IF;
 
                     IF NOT EXISTS (

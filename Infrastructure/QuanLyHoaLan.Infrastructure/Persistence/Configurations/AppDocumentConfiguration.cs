@@ -35,6 +35,7 @@ public class AppDocumentConfiguration : IEntityTypeConfiguration<AppDocument>
         builder.HasOne(document => document.Category)
             .WithMany(category => category.Documents)
             .HasForeignKey(document => document.CategoryId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(document => document.CategoryId);

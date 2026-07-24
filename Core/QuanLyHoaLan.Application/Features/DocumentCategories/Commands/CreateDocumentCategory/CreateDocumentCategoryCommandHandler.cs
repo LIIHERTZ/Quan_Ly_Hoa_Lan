@@ -26,6 +26,8 @@ public class CreateDocumentCategoryCommandHandler
         CreateDocumentCategoryCommand command,
         CancellationToken cancellationToken)
     {
+        var name = command.Name.Trim();
+        var normalizedName = name.ToLowerInvariant();
         var slug = command.Slug.Trim().ToLowerInvariant();
         Expression<Func<DocumentCategory, bool>>[] slugFilter =
             [category => category.Slug == slug];
@@ -34,13 +36,25 @@ public class CreateDocumentCategoryCommandHandler
             throw new InvalidOperationException("Slug danh mục tài liệu đã tồn tại.");
         }
 
+        Expression<Func<DocumentCategory, bool>>[] nameFilter =
+        [
+            category =>
+                category.ParentId == command.ParentId &&
+                category.Name.ToLower() == normalizedName
+        ];
+        if (await _categoryRepository.AnyAsync(nameFilter))
+        {
+            throw new InvalidOperationException(
+                "Tên danh mục đã tồn tại trong cùng một danh mục cha.");
+        }
+
         var categories = await _categoryRepository.FindAsync(limit: int.MaxValue);
         DocumentCategoryTree.EnsureValidParent(Guid.NewGuid(), command.ParentId, categories);
         await EnsureParentIsNotUsedByDocument(command.ParentId);
 
         var category = new DocumentCategory
         {
-            Name = command.Name.Trim(),
+            Name = name,
             Description = command.Description?.Trim() ?? string.Empty,
             Slug = slug,
             ParentId = command.ParentId
