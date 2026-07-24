@@ -7,4 +7,5 @@ public class UploadDocumentRequest
     public IFormFile File { get; set; } = null!;
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public Guid CategoryId { get; set; }
 }

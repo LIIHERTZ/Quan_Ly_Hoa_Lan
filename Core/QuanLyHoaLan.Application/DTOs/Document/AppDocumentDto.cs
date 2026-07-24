@@ -9,5 +9,8 @@ public class AppDocumentDto
     public string Extension { get; set; } = string.Empty;
     public long SizeBytes { get; set; }
     public string Url { get; set; } = string.Empty;
+    public Guid CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string CategorySlug { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
 }

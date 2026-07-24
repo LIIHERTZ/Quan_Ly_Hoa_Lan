@@ -11,4 +11,7 @@ public class AppDocument : BaseEntity
     public long SizeBytes { get; set; }
     public string Url { get; set; } = string.Empty;
     public string? PublicId { get; set; }
+
+    public Guid CategoryId { get; set; }
+    public virtual DocumentCategory Category { get; set; } = null!;
 }

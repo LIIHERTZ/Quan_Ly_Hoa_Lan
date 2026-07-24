@@ -31,5 +31,12 @@ public class AppDocumentConfiguration : IEntityTypeConfiguration<AppDocument>
 
         builder.Property(x => x.PublicId)
             .HasMaxLength(255);
+
+        builder.HasOne(document => document.Category)
+            .WithMany(category => category.Documents)
+            .HasForeignKey(document => document.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(document => document.CategoryId);
     }
 }

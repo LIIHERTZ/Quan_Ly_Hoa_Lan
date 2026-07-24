@@ -6,21 +6,25 @@ public class UploadDocumentCommandValidator : AbstractValidator<UploadDocumentCo
 {
     public UploadDocumentCommandValidator()
     {
-        RuleFor(x => x.FileStream)
+        RuleFor(command => command.FileStream)
             .NotNull()
             .WithMessage("File stream is required.");
-        
-        RuleFor(x => x.FileName)
+
+        RuleFor(command => command.FileName)
             .NotEmpty()
             .WithMessage("File name is required.");
 
-        RuleFor(x => x.Title)
+        RuleFor(command => command.CategoryId)
+            .NotEmpty()
+            .WithMessage("Danh mục tài liệu là bắt buộc.");
+
+        RuleFor(command => command.Title)
             .NotEmpty()
             .WithMessage("Tiêu đề tài liệu không được để trống.")
             .MaximumLength(255)
             .WithMessage("Tiêu đề không được vượt quá 255 ký tự.");
 
-        RuleFor(x => x.Description)
+        RuleFor(command => command.Description)
             .MaximumLength(1000)
             .WithMessage("Mô tả không được vượt quá 1000 ký tự.");
     }
